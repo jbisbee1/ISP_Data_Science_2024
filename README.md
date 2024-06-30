@@ -55,7 +55,7 @@ You are expected to adopt the following workflow for this class:
 
 You will be assigned problem sets which will test your ability to apply what you've learned in class, and to think creatively about your own data science ideas. These problem sets are assigned twice per week, one on Monday and the other on Thursday. Monday's You are welcome to collaborate on these problem sets, and are encouraged to ask questions on the **Class feed** on `Campuswire`.
 
-There are also two exams. The first is a mid-term exam that is scheduled for July 15th and will take place in class. The second is a cumulative final exam that will take place in class on July 25th.
+There are also two exams. The first is a mid-term exam that is scheduled for July 11th and will take place in class. The second is a cumulative final exam that will take place in class on July 25th.
 
 The final grade is the sum of total points defined as follows:
 
@@ -81,6 +81,10 @@ Letter grades are determined as per the standard SNU grading system, reproduced 
 *[Back to ToC](#table-of-contents)*
 
 ## Course Policies
+
+### Problem Set Submissions
+
+Problem sets must be emailed to TA Eun Ji Kim prior to the lecture at which they are due. They must be emailed **formatted as a PDF**. To do this, please follow the instructions laid out in the helper problem set 0, which can be found here: 
 
 ### Late Assignments
 
@@ -140,6 +144,8 @@ All these can also be found on the [Campuswire calendar](https://campuswire.com/
 
 
 ## Helpful Resources
+
+[How to convert .Rmd to .PDF]()
 
 [Rstudio Cheat Sheet: Data Wrangling](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)
 
