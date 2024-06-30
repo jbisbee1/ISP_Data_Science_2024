@@ -1018,12 +1018,6 @@ data.frame(step = c('Observation','Question','Theory','Hypothesis','Data Collect
 
 ---
 
-# Grades
-
-<center><img src="figs/rubric.png" width="40%"></center>
-
----
-
 # Grades: PSets
 
 - 6 in total
