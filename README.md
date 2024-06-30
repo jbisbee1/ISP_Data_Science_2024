@@ -121,7 +121,7 @@ All these can also be found on the [Campuswire calendar](https://campuswire.com/
 
 | Date | Topic | Learning Goal | Materials | HW | Pset 
 | ---: | :--- | :--- | --- | --- | --- 
-07/01 | Introduction | Scientific method, camps of analysis | [Lecture 1](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ISP_lecture_1_slides.html#1) | [HW 1](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_1.pdf) | [PS 1](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_1.Rmd)
+07/01 | Introduction | Scientific method, camps of analysis | [Lecture 1](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Lectures/ISP_lecture_1_slides.pdf) | [HW 1](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_1.pdf) | [PS 1](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_1.Rmd)
 07/02 | Intro to R | Objects, functions, and visualization | [Lecture 2](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ISP_lecture_2_slides.html#1) | [HW 2](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_2.pdf) | 
 07/03 | Data Wrangling | Replicability and tabular data | [Lecture 3](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ISP_lecture_3_slides.html#1) | [HW 3](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_3.pdf) | 
 07/04 | Univariate Analysis | Summaries of a single variable | [Lecture 4](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ISP_lecture_4_slides.html#1) | [HW 4](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_4.Rmd) | [PS 2](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_2.Rmd)
