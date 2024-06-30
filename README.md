@@ -84,7 +84,7 @@ Letter grades are determined as per the standard SNU grading system, reproduced 
 
 ### Problem Set Submissions
 
-Problem sets must be emailed to TA Eun Ji Kim prior to the lecture at which they are due. They must be emailed **formatted as a PDF**. To do this, please follow the instructions laid out in the helper problem set 0, which can be found here: 
+Problem sets must be emailed to TA Eun Ji Kim prior to the lecture at which they are due. They must be emailed **formatted as a PDF**. To do this, please follow the instructions laid out in the [helper problem set 0](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_0_HELPER.pdf), which can be found here: https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_0_HELPER.pdf
 
 ### Late Assignments
 
