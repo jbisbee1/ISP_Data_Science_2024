@@ -1,4 +1,4 @@
-# Data Science for Political and Social Science: Applications in R
+# Data Science for Political and Social Science:<br/>Applications in R
 
 ## Table of Contents
 
