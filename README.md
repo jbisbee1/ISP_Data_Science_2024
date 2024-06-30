@@ -53,11 +53,11 @@ You are expected to adopt the following workflow for this class:
 
 ## Evaluation & Responsibilities
 
-Given the nature of the material, as well as the size of the class, participation is not part of your grade. Instead, you will be assigned weekly problem sets beginning with Topic 3 which will test your ability to apply what you've learned in class, and to think creatively about your own data science ideas. These problem sets are assigned on the Monday of each week and are due by **11:59PM Nashville time the following Friday**. You are welcome to collaborate on these problem sets, and are encouraged to ask questions on the **Class feed** on `Campuswire`.
+You will be assigned problem sets which will test your ability to apply what you've learned in class, and to think creatively about your own data science ideas. These problem sets are assigned twice per week, one on Monday and the other on Thursday. Monday's You are welcome to collaborate on these problem sets, and are encouraged to ask questions on the **Class feed** on `Campuswire`.
 
-There are also two exams. The first is a mid-term exam that is scheduled for March 7th (Thursday before spring break) and will take place in class. The preceding Tuesday (March 5th) will be an optional review session, where you should come prepared with questions. The second exam is a cumulative final that is scheduled for April 23rd.
+There are also two exams. The first is a mid-term exam that is scheduled for July 15th and will take place in class. The second is a cumulative final exam that will take place in class on July 25th.
 
-The final grade is calculated as a weighted average of these components with the following weights:
+The final grade is the sum of total points defined as follows:
 
 - **Problem sets:** 6 in total, each worth 10 points.
 - **Exams:** Midterm and final. The midterm is worth 15 points, and the final worth 20 points. These are in-class exams.
@@ -84,7 +84,7 @@ Letter grades are determined as per the standard SNU grading system, reproduced 
 
 ### Late Assignments
 
-Given the truncated duration of the summer session, any problem set that is not submitted on time will not be graded. (But remember you have two "freebies".)
+Given the truncated duration of the summer session, any problem set that is not submitted on time will not be graded.
 
 ### Cell Phones, Laptops, Tablets, etc.
 
@@ -110,8 +110,8 @@ The observance of religious holidays (activities observed by a religious group o
 *[Back to ToC](#table-of-contents)*
 
 ## Office Hours
-* Prof. Bisbee: T & Th from 2PM-3PM in 
-* TA Brych: TBD
+* Prof. Bisbee: TBD
+* TA Eun Ji Kim: TBD
 
 All these can also be found on the [Campuswire calendar](https://campuswire.com/c/calendar), along with the Zoom links for those hosting their office hours remotely.
 
@@ -122,19 +122,19 @@ All these can also be found on the [Campuswire calendar](https://campuswire.com/
 | Date | Topic | Learning Goal | Materials | HW | Pset 
 | ---: | :--- | :--- | --- | --- | --- 
 07/01 | Introduction | Scientific method, camps of analysis | [Lecture 1](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Lectures/ISP_lecture_1_slides.pdf) | [HW 1](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_1.pdf) | [PS 1](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_1.Rmd)
-07/02 | Intro to R | Objects, functions, and visualization | [Lecture 2](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ISP_lecture_2_slides.html#1) | [HW 2](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_2.pdf) | 
-07/03 | Data Wrangling | Replicability and tabular data | [Lecture 3](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ISP_lecture_3_slides.html#1) | [HW 3](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_3.pdf) | 
-07/04 | Univariate Analysis | Summaries of a single variable | [Lecture 4](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ISP_lecture_4_slides.html#1) | [HW 4](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_4.Rmd) | [PS 2](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_2.Rmd)
-07/08 | Multivariate Analysis | Summaries of multiple variables | [Lecture 5](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ISP_lecture_5_slides.html#1) | [HW 5](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_5.Rmd) | [PS 3](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_3.Rmd)
-07/09 | Uncertainty | Uncertainty and confidence | [Lecture 6](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ISP_lecture_6_slides.html#1) | [HW 6](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_6.Rmd) | 
+07/02 | Intro to R | Objects, functions, and visualization | [Lecture 2](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Lectures/ISP_lecture_2_slides.pdf) | [HW 2](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_2.pdf) | 
+07/03 | Data Wrangling | Replicability and tabular data | [Lecture 3](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Lectures/ISP_lecture_3_slides.pdf) | [HW 3](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_3.pdf) | 
+07/04 | Univariate Analysis | Summaries of a single variable | [Lecture 4](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Lectures/ISP_lecture_4_slides.pdf) | [HW 4](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_4.Rmd) | [PS 2](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_2.Rmd)
+07/08 | Multivariate Analysis | Summaries of multiple variables | [Lecture 5](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Lectures/ISP_lecture_5_slides.pdf) | [HW 5](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_5.Rmd) | [PS 3](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_3.Rmd)
+07/09 | Uncertainty | Uncertainty and confidence | [Lecture 6](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Lectures/ISP_lecture_6_slides.pdf) | [HW 6](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_6.Rmd) | 
 07/10 | Review session | | | 
 07/11 | Midterm Exam |  |  |  | 
-07/15 | Regression 1 | The concept of a linear regression | [Lecture 7](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ISP_lecture_7_slides.html#1) | [HW 7](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_7.Rmd) | [PS 4](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_4.Rmd)
-07/16 | Regression 2 | Interpreting output and evaluating model | [Lecture 8](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ISP_lecture_8_slides.html#1) | [HW 8](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_13.Rmd) | 
-07/17 | Classification 1 | The concept of a logistic regression | [Lecture 9](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ISP_lecture_15_slides.html#1) | [HW 9](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_8.Rmd) | 
-07/18 | Classification 2 | Interpreting output and evaluating model | [Lecture 10](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ISP_lecture_10_slides.html#1) | [HW 10](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_10.Rmd) | [PS 5](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_5.Rmd)
-07/22 | Clustering | k-means clustering | [Lecture 11](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ISP_lecture_11_slides.html#1) | [HW 11](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_11.Rmd) | [PS 6](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_6.Rmd)
-07/23 | NLP 1 | k-means clustering on text | [Lecture 12](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ISP_lecture_12_slides.html#1) | [HW 12](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_12.Rmd) | 
+07/15 | Regression 1 | The concept of a linear regression | [Lecture 7](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Lectures/ISP_lecture_7_slides.pdf) | [HW 7](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_7.Rmd) | [PS 4](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_4.Rmd)
+07/16 | Regression 2 | Interpreting output and evaluating model | [Lecture 8](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Lectures/ISP_lecture_8_slides.pdf) | [HW 8](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_13.Rmd) | 
+07/17 | Classification 1 | The concept of a logistic regression | [Lecture 9](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Lectures/ISP_lecture_9_slides.pdf) | [HW 9](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_8.Rmd) | 
+07/18 | Classification 2 | Interpreting output and evaluating model | [Lecture 10](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Lectures/ISP_lecture_10_slides.pdf) | [HW 10](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_10.Rmd) | [PS 5](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_5.Rmd)
+07/22 | Clustering | k-means clustering | [Lecture 11](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Lectures/ISP_lecture_11_slides.pdf) | [HW 11](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_11.Rmd) | [PS 6](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_6.Rmd)
+07/23 | NLP 1 | k-means clustering on text | [Lecture 12](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Lectures/ISP_lecture_12_slides.pdf) | [HW 12](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_12.Rmd) | 
 07/24 | Review session | | | 
 07/25 | Final Exam |  |  | 
 
