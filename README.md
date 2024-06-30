@@ -39,7 +39,7 @@ Here is the list of channels you should see upon joining the Campuswire workspac
 - **Grades**: A space for grades
 	
 ### GitHub
-I have created a [`GitHub`](https://github.com/jbisbee1/DS1000-S2024) repository to prepare and share all course-related content. This very syllabus is available as the repository's README and all links below are connected to the appropriate folders, sub-folders, and files in this repository. 
+I have created a [`GitHub`](https://github.com/jbisbee1/ISP_Data_Science_2024) repository to prepare and share all course-related content. This very syllabus is available as the repository's README and all links below are connected to the appropriate folders, sub-folders, and files in this repository. 
 
 You are expected to adopt the following workflow for this class:
 
@@ -59,11 +59,9 @@ There are also two exams. The first is a mid-term exam that is scheduled for Mar
 
 The final grade is calculated as a weighted average of these components with the following weights:
 
-- **Problem sets:** 8 in total, only 6 of which are worth 10 points each. I will automatically drop the lowest-scoring problem sets from your final grade. Note that if you choose to complete all 8, these will count as extra credit.
+- **Problem sets:** 6 in total, each worth 10 points.
 - **Exams:** Midterm and final. The midterm is worth 15 points, and the final worth 20 points. These are in-class exams.
-- **Attendance:** You are expected to attend lecture, although are given two "freebies" which will not count toward your final grade. Each class is worth 0.36 points.
-
-
+- **Attendance:** You are expected to attend lecture, although are given two "freebies" which will not count toward your final grade. Each class is worth 0.36 points, for a total of 5 points.
 
 Letter grades are determined as per the standard SNU grading system, reproduced below:
 
@@ -123,22 +121,22 @@ All these can also be found on the [Campuswire calendar](https://campuswire.com/
 
 | Date | Topic | Learning Goal | Materials | HW | Pset 
 | ---: | :--- | :--- | --- | --- | --- 
-07/01 | Introduction | Scientific method, camps of analysis | [Lecture 1](https://www.jamesbisbee.com/DS1000_S2024/Lectures/ds1000_lecture_1_slides.html#1)<br/>[Notes 1](https://github.com/jbisbee1/DS1000_S2024/blob/main/Lectures/ds1000_lecture_1_notes.Rmd) | [HW 1](https://github.com/jbisbee1/DS1000_S2024/blob/main/Homeworks/ds1000_hw_1.Rmd) | [PS 1](https://github.com/jbisbee1/DS1000_S2024/blob/main/Psets/ds1000_pset_0.Rmd)<br/>[AK 1]()
-07/02 | Intro to R | Objects, functions, and visualization | [Lecture 2](https://www.jamesbisbee.com/DS1000_S2024/Lectures/ds1000_lecture_2_slides.html#1)<br/>[Notes 2](https://github.com/jbisbee1/DS1000_S2024/blob/main/Lectures/ds1000_lecture_2_notes.Rmd) | [HW 2](https://github.com/jbisbee1/DS1000_S2024/blob/main/Homeworks/ds1000_hw_2.Rmd) | 
-07/03 | Data Wrangling | Replicability and tabular data | [Lecture 3](https://www.jamesbisbee.com/DS1000_S2024/Lectures/ds1000_lecture_5_slides.html#1)<br/>[Notes 5](https://github.com/jbisbee1/DS1000_S2024/blob/main/Lectures/ds1000_lecture_5_notes.Rmd) | [HW 3](https://github.com/jbisbee1/DS1000_S2024/blob/main/Homeworks/ds1000_hw_5.Rmd) | 
-07/04 | Univariate Analysis | Summaries of a single variable | [Lecture 4](https://www.jamesbisbee.com/DS1000_S2024/Lectures/ds1000_lecture_6_slides.html#1)<br/>[Notes 6](https://github.com/jbisbee1/DS1000_S2024/blob/main/Lectures/ds1000_lecture_6_notes.Rmd) | [HW 4](https://github.com/jbisbee1/DS1000_S2024/blob/main/Homeworks/ds1000_hw_6.Rmd) | 
-[PS 2](https://github.com/jbisbee1/DS1000_S2024/blob/main/Psets/ds1000_pset_3.Rmd)<br/>[AK 2]()
-07/08 | Multivariate Analysis | Summaries of multiple variables | [Lecture 5](https://www.jamesbisbee.com/DS1000_S2024/Lectures/ds1000_lecture_7_slides.html#1)<br/>[Notes 7](https://github.com/jbisbee1/DS1000_S2024/blob/main/Lectures/ds1000_lecture_7_notes.Rmd) | [HW 5](https://github.com/jbisbee1/DS1000_S2024/blob/main/Homeworks/ds1000_hw_7.Rmd) | [PS 3](https://github.com/jbisbee1/DS1000_S2024/blob/main/Psets/ds1000_pset_4.Rmd)<br/>[AK 3]()
-07/09 | Uncertainty | Uncertainty and confidence | [Lecture 6](https://www.jamesbisbee.com/DS1000_S2024/Lectures/ds1000_lecture_10_slides.html#1) | [HW 6](https://github.com/jbisbee1/DS1000_S2024/blob/main/Homeworks/ds1000_hw_10.Rmd) | 
+07/01 | Introduction | Scientific method, camps of analysis | [Lecture 1](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ds1000_lecture_1_slides.html#1) | [HW 1](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ds1000_hw_1.Rmd) | [PS 1](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ds1000_pset_0.Rmd)<br/>[AK 1]()
+07/02 | Intro to R | Objects, functions, and visualization | [Lecture 2](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ds1000_lecture_2_slides.html#1) | [HW 2](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ds1000_hw_2.Rmd) | 
+07/03 | Data Wrangling | Replicability and tabular data | [Lecture 3](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ds1000_lecture_5_slides.html#1) | [HW 3](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ds1000_hw_5.Rmd) | 
+07/04 | Univariate Analysis | Summaries of a single variable | [Lecture 4](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ds1000_lecture_6_slides.html#1) | [HW 4](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ds1000_hw_6.Rmd) | 
+[PS 2](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ds1000_pset_3.Rmd)<br/>[AK 2]()
+07/08 | Multivariate Analysis | Summaries of multiple variables | [Lecture 5](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ds1000_lecture_7_slides.html#1) | [HW 5](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ds1000_hw_7.Rmd) | [PS 3](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ds1000_pset_4.Rmd)<br/>[AK 3]()
+07/09 | Uncertainty | Uncertainty and confidence | [Lecture 6](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ds1000_lecture_10_slides.html#1) | [HW 6](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ds1000_hw_10.Rmd) | 
 07/10 | Review session | | | 
 07/11 | Midterm Exam |  |  | [AK]() | 
-07/15 | Regression 1 | The concept of a linear regression | [Lecture 7](https://www.jamesbisbee.com/DS1000_S2024/Lectures/ds1000_lecture_12_slides.html#1) | [HW 7](https://github.com/jbisbee1/DS1000_S2024/blob/main/Homeworks/ds1000_hw_12.Rmd) | [PS 4](https://github.com/jbisbee1/DS1000_S2024/blob/main/Psets/ds1000_pset_7.Rmd)<br/>[AK 4]()
-07/16 | Regression 2 | Interpreting output and evaluating model | [Lecture 8](https://www.jamesbisbee.com/DS1000_S2024/Lectures/ds1000_lecture_13_slides.html#1) | [HW 8](https://github.com/jbisbee1/DS1000_S2024/blob/main/Homeworks/ds1000_hw_13.Rmd) | 
-07/17 | Classification 1 | The concept of a logistic regression | [Lecture 9](https://www.jamesbisbee.com/DS1000_S2024/Lectures/ds1000_lecture_15_slides.html#1) | [HW 9](https://github.com/jbisbee1/DS1000_S2024/blob/main/Homeworks/ds1000_hw_15.Rmd) | 
-07/18 | Classification 2 | Interpreting output and evaluating model | [Lecture 10](https://www.jamesbisbee.com/DS1000_S2024/Lectures/ds1000_lecture_16_slides.html#1) | [HW 10](https://github.com/jbisbee1/DS1000_S2024/blob/main/Homeworks/ds1000_hw_16.Rmd) | [PS 5](https://github.com/jbisbee1/DS1000_S2024/blob/main/Psets/ds1000_pset_7.Rmd)<br/>[AK 5]()
-07/22 | Clustering | k-means clustering | [Lecture 11](https://www.jamesbisbee.com/DS1000_S2024/Lectures/ds1000_lecture_18_slides.html#1) | [HW 11](https://github.com/jbisbee1/DS1000_S2024/blob/main/Homeworks/ds1000_hw_18.Rmd) | [PS 6](https://github.com/jbisbee1/DS1000_S2024/blob/main/Psets/ds1000_pset_10.Rmd)<br/>[AK 6]()
-07/23 | NLP 1 | k-means clustering on text | [Lecture 12](https://www.jamesbisbee.com/DS1000_S2024/Lectures/ds1000_lecture_19_slides.html#1) | [HW 12](https://github.com/jbisbee1/DS1000_S2024/blob/main/Homeworks/ds1000_hw_19.Rmd) | 
-07/24 | NLP 2 | Sentiment analysis | [Lecture 13](https://www.jamesbisbee.com/DS1000_S2024/Lectures/ds1000_lecture_20_slides.html#1) | [HW 20*](https://github.com/jbisbee1/DS1000_S2024/blob/main/Homeworks/ds1000_hw_20.Rmd)  | 
+07/15 | Regression 1 | The concept of a linear regression | [Lecture 7](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ds1000_lecture_12_slides.html#1) | [HW 7](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ds1000_hw_12.Rmd) | [PS 4](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ds1000_pset_7.Rmd)<br/>[AK 4]()
+07/16 | Regression 2 | Interpreting output and evaluating model | [Lecture 8](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ds1000_lecture_13_slides.html#1) | [HW 8](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ds1000_hw_13.Rmd) | 
+07/17 | Classification 1 | The concept of a logistic regression | [Lecture 9](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ds1000_lecture_15_slides.html#1) | [HW 9](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ds1000_hw_15.Rmd) | 
+07/18 | Classification 2 | Interpreting output and evaluating model | [Lecture 10](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ds1000_lecture_16_slides.html#1) | [HW 10](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ds1000_hw_16.Rmd) | [PS 5](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ds1000_pset_7.Rmd)<br/>[AK 5]()
+07/22 | Clustering | k-means clustering | [Lecture 11](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ds1000_lecture_18_slides.html#1) | [HW 11](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ds1000_hw_18.Rmd) | [PS 6](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ds1000_pset_10.Rmd)<br/>[AK 6]()
+07/23 | NLP 1 | k-means clustering on text | [Lecture 12](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ds1000_lecture_19_slides.html#1) | [HW 12](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ds1000_hw_19.Rmd) | 
+07/24 | NLP 2 | Sentiment analysis | [Lecture 13](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ds1000_lecture_20_slides.html#1) | [HW 20*](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ds1000_hw_20.Rmd)  | 
 07/25 | Final Exam |  |  | [AK]()
 
 * Final homework is optional.
