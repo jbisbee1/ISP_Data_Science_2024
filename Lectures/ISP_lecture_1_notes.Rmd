@@ -1,0 +1,111 @@
+---
+title: "Lecture 1"
+output: html_document
+date: "2024-07-01"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Lecture 1: Regular Typing
+These are some notes. Teaching is confusing me. I don't understand what is happening.
+
+제가 공부하고있어요.
+
+- This is bullet 1
+- This is bullet 2
+
+1. This is item 1
+2. This is item 2
+
+This is **bold** text.
+This is *italic* text.
+
+## Lecture 1: R coding
+
+Three backticks: `
+
+```{r}
+2+2
+5*40
+whateveryouwant <- 5*40
+```
+
+Some more notes...why do we care about "object assignment operators" or saving things to "objects"?
+
+Because, we can then refer to them and use them **later**.
+
+```{r}
+whateveryouwant
+```
+
+More sophisticated functions:
+- average
+- sum
+
+(Aside: Fast commands)
+1. PC: ctrl + alt + i
+2. Mac: ctrl + option + i
+
+Examples of averaging and summing
+
+- First create 3 numbers and store them in an object
+```{r}
+threeNumbs <- c(10,-100,50)
+threeNumbs
+```
+
+- Second take the average with the `mean()` function
+
+```{r}
+mean(threeNumbs)
+mean(c(10,-100,50))
+```
+
+- Or take the median with the `median()` function
+
+```{r}
+median(threeNumbs)
+```
+
+- Or take the sum with the `sum()` function
+
+```{r}
+sum(threeNumbs)
+```
+
+Create your own function
+
+```{r}
+customMean <- function(x) {
+  sum(x) / length(x)
+}
+```
+
+## Packages
+
+Packages are collections of functions written by someone else.
+
+`tidyverse`
+
+1. Step 1: `install.packages("tidyverse")`
+  
+  - **DO THIS FROM THE CONSOLE...NOT IN A CODE CHUNK**
+  
+2. Step 2: `require(tidyverse)`
+
+```{r}
+require(tidyverse)
+```
+
+## Loading data
+
+We use the `read_rds()` function to load data
+
+```{r}
+debt <- read_rds("https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/sc_debt.Rds")
+
+debt
+```
+
