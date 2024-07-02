@@ -1,0 +1,205 @@
+---
+title: "Lecture Notes"
+output: html_document
+date: "2024-07-02"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Functions, Objects and Visualization
+
+```{r}
+require(tidyverse)
+
+df <- read_rds("https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/sc_debt.Rds")
+
+df
+```
+
+# Look at column names
+
+```{r}
+colnames(df)
+```
+
+# New functions: head()
+
+```{r}
+df %>%
+  head()
+```
+
+# New functions: filter()
+
+```{r}
+df %>%
+  filter(instnm == "Vanderbilt University")
+```
+
+# New functions: select()
+
+```{r}
+df %>%
+  select(md_earn_wne_p6,costt4_a)
+```
+
+# Combining functions
+
+```{r}
+# Vanderbilt
+df %>%
+  filter(instnm == "Vanderbilt University") %>%
+  select(md_earn_wne_p6,costt4_a)
+
+# Harvard
+df %>%
+  filter(instnm == "Harvard University") %>%
+  select(md_earn_wne_p6,costt4_a)
+```
+
+# Augmented filter()
+
+```{r}
+df %>%
+  filter(str_detect(instnm, "Harvard")) %>%
+  select(md_earn_wne_p6, costt4_a,sat_avg)
+```
+
+# OR logic in filter()
+
+```{r}
+df %>%
+  filter(instnm == "Vanderbilt University" | instnm == "Harvard University") %>%
+  select(instnm,md_earn_wne_p6,costt4_a,sat_avg)
+
+# str_detect() version of OR
+df %>%
+  filter(str_detect(instnm,"Harvard|Vanderbilt")) %>%
+  select(instnm,sat_avg)
+```
+
+# Applied test: schools with the word "of" in their name
+
+```{r}
+df %>%
+  filter(str_detect(instnm,"of")) %>%
+  select(instnm,sat_avg)
+
+# that are located in vermont
+df %>%
+  filter(str_detect(instnm,"of")) %>%
+  # filter(stabbr == "VT") %>%
+  filter(str_detect(instnm,"Vermont")) %>%
+  select(instnm,sat_avg)
+
+# Combine in a single filter with commas (,)
+df %>%
+  filter(str_detect(instnm,"of"),
+         stabbr == "VT") %>%
+  select(instnm,sat_avg)
+```
+
+# RQ: What is the relationship between SAT scores and sarlary?
+
+```{r}
+df %>%
+  select(instnm,sat_avg,md_earn_wne_p6)
+```
+
+# New function: summarise()
+
+```{r}
+df %>%
+  summarise(overall_avg_sat = mean(sat_avg,na.rm = TRUE))
+
+df %>%
+  summarise(overall_avg_earnings = mean(md_earn_wne_p6,na.rm=T))
+```
+
+# Creating relationships with filter() %>% summarise()
+
+```{r}
+df %>%
+  filter(sat_avg < 1141) %>%
+  summarise(low_sat_salary = mean(md_earn_wne_p6,na.rm=T))
+
+df %>%
+  filter(sat_avg > 1141) %>%
+  summarise(high_sat_salary = mean(md_earn_wne_p6,na.rm=T))
+```
+
+# New function: mutate()
+
+```{r}
+df %>%
+  mutate(new_column = 1) %>%
+  select(instnm,new_column)
+
+# NOTE: this will produce an error because we didn't add the new column to the df
+# df %>%
+#   select(new_column,sat_avg,md_earn_wne_p6)
+
+# Save a new column
+df <- df %>%
+  mutate(new_column = 1)
+
+df %>%
+  select(instnm,new_column)
+
+df <- df %>%
+  filter(instnm == "Vanderbilt") %>%
+  select(instnm)
+
+df
+
+df <- read_rds("https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/sc_debt.Rds")
+```
+
+# Augmented mutate()
+
+```{r}
+df %>%
+  mutate(sat_quality = ifelse(sat_avg > 1141,
+                              "high SAT school",
+                              "low SAT school")) %>%
+  select(instnm,sat_avg,sat_quality)
+
+df <- df %>%
+  mutate(sat_quality = ifelse(sat_avg > 1141,
+                              "high SAT school",
+                              "low SAT school"))
+```
+
+# New function: group_by()
+
+```{r}
+df %>%
+  group_by(sat_quality) %>%
+  summarise(avg_salary = mean(md_earn_wne_p6,na.rm=T))
+
+df %>%
+  group_by(stabbr) %>%
+  summarise(avg_sat = mean(sat_avg,na.rm=T))
+```
+
+# LAST new function: arrange()
+
+```{r}
+df %>%
+  group_by(stabbr) %>%
+  summarise(avg_sat = mean(sat_avg,na.rm=T)) %>%
+  arrange(-avg_sat)
+
+df %>%
+  group_by(stabbr) %>%
+  summarise(avg_sat = mean(sat_avg,na.rm=T)) %>%
+  arrange(desc(avg_sat))
+```
+
+
+
+
+
+
