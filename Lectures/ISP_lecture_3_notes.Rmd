@@ -1,0 +1,207 @@
+---
+title: "Lecture 3 Notes"
+output: html_document
+date: "2024-07-02"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Which state (`stabbr`) has the lowest average admissions rate (`adm_rate`)?
+
+```{r}
+require(tidyverse)
+df <- read_rds("https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/sc_debt.Rds")
+
+df %>%
+  arrange(adm_rate) %>%
+  select(stabbr,adm_rate)
+
+df %>%
+  group_by(stabbr) %>%
+  summarise(avg_adm_rate = mean(adm_rate,na.rm=T)) %>%
+  arrange(avg_adm_rate)
+```
+
+## Research Question: Do students from more selective schools (`selective`) make a higher salary (`md_earn_wne_p6`)?
+
+```{r}
+# First, make selective using mutate() and ifelse()
+df %>%
+  mutate(example_new_column = adm_rate / 2)
+
+# df %>%
+#   summarise(mean_example = mean(example_new_column))
+
+df <- df %>%
+  mutate(selective = ifelse(adm_rate < .1,
+                            'selective',
+                            'non-selective'))
+
+# Second, calculate average salary by selective
+df %>%
+  group_by(selective) %>%
+  summarise(avg_salary = mean(md_earn_wne_p6,na.rm=T))
+```
+
+## Introducing functions from ggplot2
+
+```{r}
+df %>%
+  ggplot(aes(x = adm_rate,
+             y = md_earn_wne_p6)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm')
+
+```
+
+## What is the relationship between SAT scores and earnings?
+
+```{r}
+df %>%
+  ggplot(aes(x = sat_avg,
+             y = md_earn_wne_p6)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm')
+```
+
+# Looking at outliers
+
+```{r}
+df %>%
+  mutate(outlier = ifelse(md_earn_wne_p6 > 100000,
+                          instnm,
+                          NA)) %>%
+  drop_na(outlier,sat_avg) %>%
+  select(instnm)
+```
+
+# Variable "types"
+
+```{r}
+df %>%
+  select(sat_avg,selective,md_earn_wne_p6)
+
+df %>%
+  ggplot(aes(x = selective,
+             y = md_earn_wne_p6)) + 
+  geom_point()
+```
+
+# Introducing `geom_bar()`
+
+```{r}
+df %>%
+  group_by(selective) %>%
+  summarise(avg_salary = mean(md_earn_wne_p6,na.rm=T)) %>%
+  ggplot(aes(x = selective,
+             y = avg_salary)) + 
+  geom_bar(stat = 'identity')
+
+df %>%
+  ggplot(aes(x = selective)) + 
+  geom_bar()
+```
+
+# Data Wrangling:
+
+Always start with an empty environment
+
+```{r}
+rm(list = ls())
+require(tidyverse)
+
+MI_raw <- read_rds("https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/MI2020_ExitPoll.rds")
+
+MI_raw
+```
+
+# Always LOOK at the data first
+
+```{r}
+glimpse(MI_raw)
+
+View(MI_raw)
+```
+
+# Research Question: Do older people support Trump?
+
+```{r}
+# X variable: age
+colnames(MI_raw)
+MI_raw %>%
+  select(AGE10)
+
+MI_raw %>%
+  count(AGE10)
+
+
+# Visualize with geom_bar()
+require(haven) # This is required for certain environments / package versions to convert SPSS to numeric. See TIME OUT section below and associated ChatGPT help.
+
+MI_raw %>%
+  ggplot(aes(x = as.numeric(AGE10))) + 
+  geom_bar()
+
+MI_raw %>%
+  arrange(desc(AGE10)) %>%
+  select(AGE10)
+
+# We have "unit non-response"
+MI_raw <- MI_raw %>%
+  mutate(AGE10_cleaned = ifelse(AGE10 == 99,
+                                NA,
+                                AGE10))
+
+MI_raw %>%
+  ggplot(aes(x = AGE10_cleaned)) + 
+  geom_bar()
+
+# Y variable: vote choice
+colnames(MI_raw)
+MI_raw %>%
+  count(PRSMI20)
+
+# Wrangling
+MI_raw <- MI_raw %>%
+  mutate(PRSMI20_cleaned = ifelse(PRSMI20 == 0,
+                                  NA,
+                                  ifelse(PRSMI20 == 8,
+                                         NA,
+                                         PRSMI20)))
+MI_raw %>%
+  ggplot(aes(x = PRSMI20_cleaned)) + 
+  geom_bar()
+
+# Different way to categorize
+MI_raw <- MI_raw %>%
+  mutate(preschoice = ifelse(PRSMI20_cleaned == 1,
+                             'Joe Biden',
+                             ifelse(PRSMI20_cleaned == 2,
+                                    'Donald Trump',
+                                    'Other/undecided')))
+MI_raw %>%
+  ggplot(aes(x = preschoice)) + 
+  geom_bar()
+```
+
+# TIME OUT for type errors with most of class
+
+```{r}
+MI_raw %>%
+  count(AGE10) %>%
+  ggplot(aes(x = AGE10,
+             y = n)) + 
+  geom_bar(stat = 'identity')
+```
+
+# Trying chatGPT solution: https://chatgpt.com/share/a4d8867b-e436-4108-bf88-e0fa53f7a6e1
+
+```{r}
+require(haven)
+
+MI_raw %>%
+  mutate(AGE10 = as.numeric(AGE10))
+```
+
