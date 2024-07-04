@@ -1,0 +1,152 @@
+---
+title: "Lecture 4 Notes"
+output: html_document
+date: "2024-07-03"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Wrapping up data wrangling and transitioning to univariate analysis
+
+```{r}
+require(tidyverse)
+MI <- read_rds("https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/MI2020_ExitPoll_small.rds")
+
+MI
+
+# Create barplot of preschoice
+MI %>%
+  ggplot(aes(y = preschoice)) + 
+  geom_bar() +
+  labs(y = "Presidential Vote Choice",
+       x = "Number of people",
+       title = "2020 Presidential Vote in Michigan")
+
+# Second approach...calculate count ourselves
+MI %>%
+  count(preschoice) %>%
+  ggplot(aes(y = reorder(preschoice,n),
+             x = n)) +
+  geom_bar(stat = 'identity') + 
+    labs(y = "Presidential Vote Choice",
+       x = "Number of people",
+       title = "2020 Presidential Vote in Michigan",
+       subtitle = "1,231 randomly sampled voters")
+```
+
+# Other variables we could look at
+```{r}
+View(MI)
+
+# Univariate visualization of WEIGHT
+MI %>%
+  ggplot(aes(x = WEIGHT)) + 
+  geom_histogram()
+
+# Equally good (in most cases)
+MI %>%
+  ggplot(aes(x = WEIGHT)) + 
+  geom_density()
+```
+
+# Univariate visualization of Quality
+
+```{r}
+MI %>%
+  count(Quality) %>%
+  ggplot(aes(y = reorder(Quality,n),
+             x = n)) + 
+  geom_bar(stat = 'identity')
+```
+
+# Multivariate Visualization of Quality and preschoice
+
+```{r}
+# A bad example of using geom_point()
+MI %>%
+  ggplot(aes(x = Quality,
+             y = preschoice)) + 
+  geom_point()
+
+# Let's try geom_bar()
+MI %>%
+  filter(!is.na(Quality),
+         !str_detect(Quality,"refuse")) %>%
+  filter(str_detect(preschoice,'Trump|Biden')) %>%
+  count(Quality,preschoice) %>%
+  ggplot(aes(x = n,
+             y = Quality,
+             fill = preschoice)) + 
+  geom_bar(stat = 'identity',
+           position = 'dodge')
+```
+
+# New research question:
+What is the relationship between sex and vote choice?
+
+Start with univariate visualization of X variable
+
+```{r}
+MI %>%
+  count(SEX)
+
+MI %>%
+  mutate(gender = ifelse(SEX == 1,'Male','Female')) %>%
+  ggplot(aes(x = gender)) + 
+  geom_bar()
+```
+
+Turning to multivariate visualization
+
+```{r}
+MI %>%
+  filter(str_detect(preschoice,'Trump|Biden')) %>%
+  count(SEX,preschoice) %>%
+  ggplot(aes(x = SEX,
+             y = n,
+             fill = preschoice)) + 
+  geom_bar(stat = 'identity',
+           position = 'dodge')
+
+MI %>%
+  mutate(sex = ifelse(SEX == 1,'Male','Female')) %>%
+  filter(str_detect(preschoice,'Trump|Biden')) %>%
+  count(sex,preschoice) %>%
+  ggplot(aes(x = preschoice,
+             y = n,
+             fill = sex)) + 
+  geom_bar(stat = 'identity',
+           position = 'dodge')
+```
+
+# Calculating Proportions
+
+```{r}
+# Quick wranlging the data
+MI <- MI %>%
+  mutate(sex = ifelse(SEX == 1,"Male",'Female'))
+
+# Proportion calculation #1
+MI %>%
+  filter(str_detect(preschoice,'Biden|Trump')) %>%
+  count(sex,preschoice) %>% # This counts up the number of respondents
+  group_by(sex) %>% # This and the next line calculate the total by sex
+  mutate(totn = sum(n)) %>%
+  mutate(proportion = n / totn) %>% # This calculations the proportion
+  ggplot(aes(x = preschoice,
+             y = proportion,
+             fill = sex)) + 
+  geom_bar(stat = 'identity',
+           position = 'dodge')
+
+# Proportion calculation #2
+MI %>%
+  filter(str_detect(preschoice,'Biden|Trump')) %>%
+  count(sex,preschoice) %>%
+  group_by(sex) %>%
+  mutate(proportion = prop.table(n))
+```
+
+

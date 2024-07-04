@@ -91,14 +91,16 @@ df %>%
 ## Question 6 [2 points]
 *Based on this research question, what is the outcome / dependent / $Y$ variable and what is the explanatory / independent / $X$ variable? Create the scatterplot of the data based on this answer, along with a line of best fit. Is your answer to the research question supported?*
 ```{r}
+View(df)
+
 df %>%
-  ggplot(aes(x = , # Put the explanatory variable on the x-axis
-             y = )) +  # Put the outcome variable on the y-axis
+  ggplot(aes(x = ugds, # Put the explanatory variable on the x-axis
+             y = md_earn_wne_p6)) +  # Put the outcome variable on the y-axis
   geom_point() + # Create a scatterplot
-  geom_smooth() + # Add line of best fit
-  labs(title = '', # give the plot meaningful labels to help the viewer understand it
-       x = '',
-       y = '')
+  geom_smooth(method = 'lm') + # Add line of best fit
+  labs(title = 'Student body size versus salary', # give the plot meaningful labels to help the viewer understand it
+       x = 'Number of undergraduate students',
+       y = 'Median Wage')
 ```
 
 > Write a few sentences here.
@@ -108,7 +110,7 @@ df %>%
 
 ```{r}
 df %>%
-  filter() %>% # Filter to non-research universities
+  filter(research_u == 0) %>% # Filter to non-research universities
   ggplot(aes(x = , # Put the explanatory variable on the x-axis
              y = )) +  # Put the outcome variable on the y-axis
   geom_point() + # Create a scatterplot
@@ -119,7 +121,7 @@ df %>%
        y = '')
 
 df %>%
-  filter() %>% # Filter to research universities
+  filter(research_u == 1) %>% # Filter to research universities
   ggplot(aes(x = , # Put the explanatory variable on the x-axis
              y = )) +  # Put the outcome variable on the y-axis
   geom_point() + # Create a scatterplot
@@ -135,18 +137,19 @@ df %>%
 *Instead of creating two separate plots, color the points by whether the school is a research university. To do this, you first need to modify the research_u variable to be categorical (it is currently stored as numeric). To do this, use the mutate command with `ifelse()` to create a new variable called `research_u_cat` which is either "Research" if `research_u` is equal to 1, and "Non-Research" otherwise.*
 ```{r}
 df <- df %>%
-  mutate(research_u_cat = ifelse()) # Create a labeled version of the research_u variable
+  mutate(research_u_cat = ifelse(research_u == 0,"Non-Research",
+                                 "Research")) # Create a labeled version of the research_u variable
 
 df %>%
-  ggplot(aes(x = , # Put the explanatory variable on the x-axis
-             y = , # Put the outcome variable on the y-axis
-             color = )) + # Color the points by the new variable you created above
+  ggplot(aes(x = ugds, # Put the explanatory variable on the x-axis
+             y = md_earn_wne_p6, # Put the outcome variable on the y-axis
+             color = research_u_cat)) + # Color the points by the new variable you created above
   geom_point() + # Create a scatterplot
-  geom_smooth() + # Add line of best fit
-  labs(title = '', # give the plot meaningful labels to help the viewer understand it
-       x = '',
-       color = '',
-       y = '')
+  geom_smooth(method = 'lm') + # Add line of best fit
+  labs(title = 'Student body size versus salary', # give the plot meaningful labels to help the viewer understand it
+       x = 'Number of undergraduate students',
+       color = 'Institution Type',
+       y = 'Median Future Earnings')
 ```
 
 ## Extra Credit [2 points]
