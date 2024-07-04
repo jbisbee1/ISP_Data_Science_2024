@@ -90,6 +90,7 @@ df %>%
 
 ## Question 6 [2 points]
 *Based on this research question, what is the outcome / dependent / $Y$ variable and what is the explanatory / independent / $X$ variable? Create the scatterplot of the data based on this answer, along with a line of best fit. Is your answer to the research question supported?*
+
 ```{r}
 View(df)
 

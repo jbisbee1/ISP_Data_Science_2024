@@ -1,0 +1,203 @@
+---
+title: "Problem Set 2"
+author: "[YOUR NAME]"
+date: "Due Date: 2024-07-09"
+output:
+  html_document: default
+  pdf_document: default
+subtitle: Data Wrangling
+institute: Seoul National University
+---
+
+```{r,include=F}
+knitr::opts_chunk$set(error=TRUE)
+```
+
+
+## Getting Set Up
+
+Open `RStudio` and create a new RMarkDown file (`.Rmd`) by going to `File -> New File -> R Markdown...`.
+Accept defaults and save this file as `[YOUR NAME]_ps2.Rmd` to your `code` folder.
+
+Copy and paste the contents of this `.Rmd` file into your `[YOUR NAME]_ps2.Rmd` file. Then change the `author: [Your Name]` on line 2 to your name.
+
+We will be using two different files. First is the `MI2020_ExitPoll.Rds` data from the course [github page](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/data/MI2020_ExitPoll.Rds). Second is the `nba_players_2018.rds` data, which is also on the course [github page](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/data/nba_players_2018.rds)
+
+All of the following questions should be answered in this `.Rmd` file. There are code chunks with incomplete code that need to be filled in. 
+
+This problem set is worth 10 total points, plus two extra credit points. The point values for each question are indicated in brackets below. To receive full credit, you must have the correct code. In addition, some questions ask you to provide a written response in addition to the code.
+
+You are free to rely on whatever resources you need to complete this problem set, including lecture notes, lecture presentations, Google, your classmates...you name it. However, the final submission must be complete by you. There are no group assignments. To submit, email the knitted output to Eun Ji Kim (kej990804@snu.ac.kr) **as a PDF** by the start of class on Tuesday, July 9th. If you need help converting to a PDF, see [this tutorial](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_0_HELPER.pdf).
+
+**Good luck!**
+
+*Copy the link to ChatGPT you used here: _________________
+
+
+## Question 0
+*Require `tidyverse` and load the `MI2020_ExitPoll.Rds` data to an object called `MI_raw`.*
+
+```{r}
+# INSERT CODE HERE
+```
+
+
+## Question 1 [1 point]
+*How many units of observation are there in the raw dataset? How many variables are there?*
+
+> Write answer here.
+
+*Now create a new object called `MI_clean` that contains only the following variables:*
+
+* AGE10
+* SEX
+* PARTYID
+* EDUC18
+* PRSMI20
+* QLT20
+* LGBT
+* BRNAGAIN
+* LATINOS
+* QRACEAI
+* WEIGHT
+
+```{r}
+# INSERT CODE HERE
+```
+
+*How many units of observation are there in the new dataset? How many variables are there?*
+
+> Write answer here.
+
+## Question 2 [1 point]
+*How many* **unit non-responses** *are there in the `PRSMI20` variable? Remember, unit non-response refers to people who were asked a question but refused to answer.*
+
+```{r}
+MI_clean %>%
+  count() # Enter variable name here
+```
+
+> Write answer here
+
+## Question 3 [1 point]
+*Let's create a new variable called `preschoice` that converts `PRSMI20` to a simpler categorical variable that indicates whether the respondent voted for Trump, Biden, or neither. To do this, use `mutate()` and `ifelse()` to replace the numeric values of `PRSMI20` with their text labels. Remember to replace the unit non-response code with `NA`.*
+
+```{r}
+MI_clean <- MI_clean %>%
+  mutate(preschoice = ifelse(, # Test for Biden
+                             ,
+                             ifelse(, # Test for Trump
+                                    ,
+                                    ifelse(, # Test for unit non-response
+                                           ,
+                                           ))))
+```
+
+*Now `count()` the number of respondents who reported voting for each candidate. How many respondents voted for candidate Trump in 2020?*
+
+```{r}
+# INSERT CODE HERE
+```
+
+> Write answer here.
+
+## Question 4 [1 point]
+*Now do the same for the `SEX` variable and the `LGBT` variable. Name the the text version `Gender` for `SEX` and `Lgbt_clean` for `LGBT`. Remember to replace the unit non-response code with `NA`, and be aware that different variables use different codes!*
+
+```{r}
+# Follow these steps for each variable
+# 1. count() to see the unit non-response code
+MI_clean %>%
+  count()
+
+# 2. 
+MI_clean <- MI_clean %>%
+  mutate(preschoice = ifelse(, # Test for value 1
+                             ,
+                             ifelse(, # Test for value 2
+                                    ,
+                                    ifelse(, # Test for unit non-response
+                                           ,
+                                           ))))
+```
+
+## Question 5 [1 point]
+*What proportion of women supported Trump? What proportion of LGBTQ-identifying respondents supported Trump?*
+
+```{r}
+# Apply the following for each variable
+# Method 1: more lines of code
+MI_clean %>%
+  count() %>%
+  group_by() %>%
+  mutate(totn = sum()) %>%
+  mutate(proportion = n / totn)
+
+# Method 2: prop.table()
+MI_clean %>%
+  count() %>%
+  group_by() %>%
+  mutate(proportion = prop.table(n))
+```
+
+> Write answer here.
+
+## Question 6 [1 point]
+*Now let's load a different dataset to practice univariate visualization. Open `nba_players_2018.rds` from the github page and save it to a new object called `nba`. This dataset contains information on basketball players in the NBA from the 2018-2019 season. The codebook for it can be found in homework 3, which is also on github.*
+
+```{r}
+nba <- read_rds() # Insert link here
+```
+
+*We are interested in the relationship between the player's age (`agePlayer`) and the amount of points they score (`pts`). Please answer the following research question and provide a theory supporting your answer: "Do older NBA players score more points than younger players?"*
+
+> Write answer here
+
+## Question 7 [2 points]
+*Based on this research question, what is the outcome / dependent / $Y$ variable and what is the explanatory / independent / $X$ variable? Why?*
+
+> Write answer here
+
+*Create a univariate visualization of both the $X$ and $Y$ variables. Choose the best `geom_...()` based on the variable type, and make sure to label your plots!*
+
+```{r}
+# X variable
+nba %>%
+  ggplot(aes(x = ...)) + 
+  geom_...() + 
+  labs(x = ...,
+       y = ...,
+       title = ...)
+
+# Y variable
+nba %>%
+  ggplot(aes(x = ...)) + 
+  geom_...() + 
+  labs(x = ...,
+       y = ...,
+       title = ...)
+```
+
+## Question 8 [2 points]
+*Now analyze the data by creating a multivariate visualization that shows the relationship between age and points.*
+
+```{r}
+nba %>%
+  ggplot(aes(x = ...,
+             y = ...)) + 
+  geom_...() + 
+  labs(x = ...,
+       y = ...,
+       title = ...)
+```
+
+*Based on your analysis, does the data support or reject your hypothesis from Question 6?*
+
+> Write answer here.
+
+## Extra Credit [2 points]
+*Return to the `MI_clean` dataset and calculate the proportion of women who supported Trump by age-group.*
+```{r}
+# INSERT CODE HERE
+```
+
