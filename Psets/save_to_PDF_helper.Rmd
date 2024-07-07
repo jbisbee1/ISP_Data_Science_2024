@@ -1,0 +1,17 @@
+---
+title: "Save to PDF Example"
+output: html_document
+date: "2024-07-07"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Example for saving to PDF
+
+1. Click `knit to HTML`
+2. Locate where the knitted .html document is saved
+3. Open the .html document in Google Chrome
+4. Right-click anywhere and choose `Print`
+5. Choose `Save to PDF` and click `Print`
