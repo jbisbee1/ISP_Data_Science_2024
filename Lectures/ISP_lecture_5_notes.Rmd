@@ -1,0 +1,201 @@
+---
+title: "Lecture 5 Notes"
+output: html_document
+date: "2024-07-08"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introducing new data
+
+```{r}
+require(tidyverse)
+library(labelled)
+
+nba <- read_rds("https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/nba_players_2018.Rds")
+
+nba %>%
+  select(namePlayer)
+```
+
+# Summarizing single variables
+
+```{r}
+summary(nba$pts)
+
+summary(nba %>% select(pts))
+```
+
+# Visualizing with summary statistics
+
+```{r}
+nba %>%
+  ggplot(aes(x = pts)) + 
+  geom_histogram() + # geom_density
+  geom_vline(xintercept = mean(nba$pts),
+             color = 'darkblue',linetype = 'dotted') + 
+  geom_vline(xintercept = median(nba$pts),
+             color = 'red',linetype = 'dashed') + 
+  geom_vline(xintercept = quantile(nba$pts,c(.75,.90,.99)),
+             color = 'darkgreen',size = 2)
+```
+
+# Looking at every variable
+
+```{r}
+glimpse(nba)
+```
+
+# Categorical
+
+```{r}
+# Step 1: Look
+summary(nba$slugTeam)
+
+nba %>%
+  select(slugTeam)
+
+# Step 2: Visualize
+nba %>%
+  ggplot(aes(x = slugTeam)) + 
+  geom_bar()
+
+nba %>%
+  ggplot(aes(y = slugTeam)) + 
+  geom_bar()
+
+# To order by values, need one extra step using count()
+nba %>%
+  count(slugTeam) %>%
+  ggplot(aes(x = n,
+             y = reorder(slugTeam,n))) + 
+  geom_bar(stat = 'identity')
+
+# Step 3: Summarize
+nba %>%
+  count(slugTeam) %>%
+  arrange(desc(n))
+```
+
+# Multivariate Visualization
+
+```{r}
+nba %>%
+  ggplot(aes(x = minutes,
+             y = pts)) + 
+  geom_point() + 
+  geom_smooth()
+```
+
+#### BREAK ####
+
+# Quick detour on player age
+
+```{r}
+# Step 1: Look
+nba %>%
+  select(agePlayer)
+
+# Step 2: Visualize
+nba %>%
+  ggplot(aes(x = agePlayer)) + 
+  geom_histogram(binwidth = 1)
+  # geom_density()
+  geom_bar()
+
+
+# Step 3: Summarize
+
+
+```
+
+# New data
+
+```{r}
+pres <- read_rds("https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/Pres2020_PV.Rds")
+
+pres
+
+glimpse(pres)
+
+pres %>%
+  ggplot(aes(x = Biden)) + 
+  geom_bar(fill = 'blue',alpha = .4) + 
+  geom_bar(aes(x = Trump),fill = 'red',alpha = .4) + 
+  geom_vline(xintercept = mean(pres$DemCertVote),
+             color = 'blue',size = 0.2) + 
+  geom_vline(xintercept = mean(pres$RepCertVote),
+             color = 'red',size = 1.2) + 
+  annotate(geom = "text",x = mean(pres$DemCertVote),
+           y = Inf,label = "Biden's Actual Support",
+           color = 'blue',angle = 90,hjust = 1,vjust = 1) +   annotate(geom = "text",x = mean(pres$RepCertVote),
+           y = Inf,label = "Trump's Actual Support",
+           color = 'red',angle = 90,hjust = 1,vjust = 0) + 
+  labs(x = "Popular vote share (%)",
+       y = "Number of polls",
+       title = "Poll Bias in the 2020 U.S. Presidential Election",
+       subtitle = "Predicted vs Actual Support for Trump (red) and Biden (blue)")
+```
+
+# Theory 1: Mode of survey
+
+```{r}
+pres %>%
+  count(Mode)
+
+pres %>%
+  filter(Mode == "IVR/Online" | Mode == "Live phone - RDD") %>%
+  count(Mode)
+
+pres <- pres %>%
+  mutate(margin = Biden - Trump)
+
+pres %>%
+  filter(Mode == "IVR/Online" | Mode == "Live phone - RDD") %>%
+  ggplot(aes(x = margin,fill = Mode)) + 
+  geom_histogram(position = 'dodge')
+
+# Ugly! Try density instead
+toplot <- pres %>%
+  filter(Mode == "IVR/Online" | Mode == "Live phone - RDD") 
+toplot %>%
+  ggplot(aes(x = margin,fill = Mode)) + 
+  geom_density(alpha = .3) + 
+  geom_vline(data = toplot %>%
+               group_by(Mode) %>%
+               summarise(margin = mean(margin)),
+             aes(xintercept = margin),
+             linetype = 'dashed')
+```
+
+# More modes
+
+```{r}
+toplot <- pres %>%
+  filter(Mode %in% c('IVR/Online','Live phone - RBS',
+                     'Live phone - RDD',
+                     'Online','Phone/Online'))
+
+toplot %>%
+  ggplot(aes(x = margin,fill = Mode)) + 
+  geom_density(alpha = .3) + 
+  geom_vline(data = toplot %>%
+               group_by(Mode) %>%
+               summarise(margin = mean(margin)),
+             aes(xintercept = margin),
+             linetype = 'dashed')
+
+```
+
+# Introducing new geom: geom_boxplot()
+
+```{r}
+toplot %>%
+  ggplot(aes(x = Mode,y = margin)) + 
+  geom_boxplot()
+```
+
+
+

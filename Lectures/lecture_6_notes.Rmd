@@ -1,0 +1,266 @@
+---
+title: "Lecture 6 Notes"
+output: html_document
+date: "2024-07-09"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# RQ: Do rookies turn the ball over more?
+
+```{r}
+require(tidyverse)
+nba <- read_rds('https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/nba_players_2018.Rds')
+
+glimpse(nba %>% select(tov,isRookie))
+```
+
+# Visualize both X and Y variables
+
+```{r}
+# X
+nba %>%
+  ggplot(aes(x = isRookie)) + 
+  geom_bar()
+
+# Y
+nba %>%
+  ggplot(aes(x = tov)) + 
+  geom_histogram()
+```
+
+# Bootstrap sampling
+
+```{r}
+set.seed(123)
+simulated_season <- nba %>%
+  select(namePlayer,isRookie,tov) %>%
+  sample_n(size = 200,
+           replace = T)
+
+simulated_season %>%
+  ggplot(aes(x = isRookie,
+             y = tov)) + 
+  geom_boxplot()
+
+simulated_season %>%
+  group_by(isRookie) %>%
+  summarise(avg_tov = mean(tov,na.rm=T))
+
+```
+
+# New function: for() loop
+
+```{r}
+set.seed(123)
+bootstrap_result <- NULL #instantiate an empty object
+for(i in 1:100) {
+  # Simulate a new season
+  simulated_season <- nba %>%
+  select(namePlayer,isRookie,tov) %>%
+  sample_n(size = 200,
+           replace = T)
+  
+  # Answer research question
+  answer <- simulated_season %>%
+    group_by(isRookie) %>%
+    summarise(avg_tov = mean(tov,na.rm=T))
+  
+  answer <- answer %>%
+    mutate(simulation_number = i)
+  
+  # Save result to bootstrap_result object
+  bootstrap_result <- bootstrap_result %>%
+    bind_rows(answer)
+}
+
+bootstrap_result
+```
+
+# Calculate confidence / certainty
+
+- Idea: confidence = # of sim realities that support research question / # of sim realities
+
+```{r}
+bootstrap_result
+
+# New function: pivot_wider()
+final_answer <- bootstrap_result %>%
+  pivot_wider(names_from = "isRookie",
+              values_from = "avg_tov",
+              names_prefix = "rookie") %>%
+  mutate(rookie_better = ifelse(rookieFALSE > rookieTRUE,
+                                1,
+                                0))
+
+final_answer %>%
+  count(rookie_better)
+
+final_answer %>%
+  count(rookie_better) %>%
+  mutate(confidence = prop.table(n))
+```
+
+# Visualizing Bootstrapped Results
+
+```{r}
+bootstrap_result %>%
+  ggplot(aes(x = isRookie,
+             y = avg_tov)) + 
+  geom_boxplot()
+
+# geom_density()
+bootstrap_result %>%
+  ggplot(aes(x = avg_tov,
+             fill = isRookie)) + 
+  geom_density(alpha = .3)
+```
+
+# Our methods are right but our MEASURE is wrong
+
+```{r}
+nba <- nba %>%
+  mutate(tov_per_min = tov*60 / minutes)
+
+nba %>%
+  ggplot(aes(x = tov_per_min)) + 
+  geom_histogram()
+
+# Redo analysis
+set.seed(123)
+bootstrap_result <- NULL #instantiate an empty object
+for(i in 1:1000) {
+  # Simulate a new season
+  simulated_season <- nba %>%
+  select(namePlayer,isRookie,tov_per_min) %>%
+  sample_n(size = 200,
+           replace = T)
+  
+  # Answer research question
+  answer <- simulated_season %>%
+    group_by(isRookie) %>%
+    summarise(avg_tov = mean(tov_per_min,na.rm=T))
+  
+  answer <- answer %>%
+    mutate(simulation_number = i)
+  
+  # Save result to bootstrap_result object
+  bootstrap_result <- bootstrap_result %>%
+    bind_rows(answer)
+}
+
+final_answer <- bootstrap_result %>%
+  pivot_wider(names_from = "isRookie",
+              values_from = "avg_tov",
+              names_prefix = "rookie") %>%
+  mutate(rookie_better = ifelse(rookieFALSE > rookieTRUE,
+                                1,
+                                0))
+
+final_answer %>%
+  count(rookie_better)
+
+final_answer %>%
+  count(rookie_better) %>%
+  mutate(confidence = prop.table(n))
+
+bootstrap_result %>%
+  ggplot(aes(x = avg_tov,
+             fill = isRookie)) + 
+  geom_density(alpha = .3)
+```
+
+# New data: game_summary.Rds
+
+```{r}
+games <- read_rds('https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/game_summary.Rds')
+
+View(games)
+
+# X 
+games %>%
+  ggplot(aes(x = locationGame)) + 
+  geom_bar()
+
+#Y
+games %>%
+  ggplot(aes(x = pts)) + 
+  geom_histogram()
+
+summary(games$pts)
+```
+
+# Multivariate Visualization
+
+```{r}
+# Boxplot
+games %>%
+  ggplot(aes(x = locationGame,
+             y = pts)) + 
+  geom_boxplot()
+
+# Density + fill
+games %>%
+  ggplot(aes(x = pts,
+             fill = locationGame)) + 
+  geom_density(alpha = .3)
+```
+
+# Confidence calculation via bootstrap
+
+```{r}
+set.seed(123)
+bootstrap_result <- NULL #instantiate an empty object
+for(i in 1:1000) {
+  # Simulate a new season
+  simulated_season <- games %>%
+  select(locationGame,pts) %>%
+  sample_n(size = 200,
+           replace = T)
+  
+  # Answer research question
+  answer <- simulated_season %>%
+    group_by(locationGame) %>%
+    summarise(avg_pts = mean(pts,na.rm=T))
+  
+  answer <- answer %>%
+    mutate(simulation_number = i)
+  
+  # Save result to bootstrap_result object
+  bootstrap_result <- bootstrap_result %>%
+    bind_rows(answer)
+}
+
+bootstrap_result
+
+final_answer <- bootstrap_result %>%
+  pivot_wider(names_from = "locationGame",
+              values_from = "avg_pts",
+              names_prefix = "location_") %>%
+  mutate(home_court_advantage = ifelse(location_H > location_A,
+                                1,
+                                0))
+
+final_answer %>%
+  count(home_court_advantage) %>%
+  mutate(confidence = prop.table(n))
+
+bootstrap_result %>%
+  ggplot(aes(x = avg_pts,
+             fill = locationGame)) + 
+  geom_density(alpha = .3)
+```
+
+# One final visualization of bootstrapped results
+
+```{r}
+final_answer %>%
+  mutate(pt_diff = location_H - location_A) %>%
+  ggplot(aes(x = pt_diff)) + 
+  geom_density() + 
+  geom_vline(xintercept = 0,linetype = 'dashed')
+```
+
+
