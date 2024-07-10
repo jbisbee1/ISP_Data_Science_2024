@@ -1,0 +1,240 @@
+---
+title: "Lecture 7"
+output: html_document
+date: "2024-07-10"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Biden and Trump Bias in Polling
+
+```{r}
+require(tidyverse)
+
+pres <- read_rds("https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/Pres2020_PV.Rds")
+
+```
+
+# Plot multivariate visualization
+
+```{r}
+pres %>%
+  ggplot(aes(x = Trump,
+             y = Biden)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm')
+```
+
+# Fixing the visualization to show multiple polls on the same coordinates
+
+```{r}
+# Method 1: geom_jitter()
+pres %>%
+  ggplot(aes(x = Trump,
+             y = Biden)) + 
+  geom_jitter() + 
+  geom_smooth(method = 'lm')
+
+# Method 2: size + alpha
+pres %>%
+  ggplot(aes(x = Trump,
+             y = Biden)) + 
+  geom_point(alpha = .3,size = 5) + 
+  geom_smooth(method = 'lm')
+
+# Method 3: count() + size
+View(pres)
+p1 <- pres %>%
+  count(Trump,Biden) %>%
+  ggplot(aes(x = Trump,
+             y = Biden,
+             size = n)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm',aes(weight = n)) + 
+  geom_vline(xintercept = 47) + 
+  geom_hline(yintercept = 51)
+
+p1
+
+p2 <- pres %>%
+  ggplot(aes(x = Trump,y = Biden)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm')  + 
+  geom_vline(xintercept = 47) + 
+  geom_hline(yintercept = 51)
+
+require(patchwork)
+
+p1 + p2
+```
+
+# Looking at time
+
+```{r}
+# Idea #1: It is a categorical variable
+# Step 1: Look
+pres %>%
+  select(StartDate)
+
+# Step 2: Univariate Visualization
+pres %>%
+  ggplot(aes(y = StartDate)) + 
+  geom_bar()
+
+# Conclusion: text DOESN'T WORK
+
+# Idea #2: numeric
+# pres %>%
+#   ggplot(aes(x = StartDate)) + 
+#   geom_histogram()
+
+# Conclusion: numeric DOESN'T WORK
+```
+
+# New function: as.Date()
+
+```{r}
+example_date <- "2024-07-10"
+
+exam_date <- "2024-07-11"
+
+#exam_date - example_date
+
+as.Date(exam_date) - as.Date(example_date)
+
+# American date example
+today_date <- "07/10/2024"
+
+as.Date(today_date)
+
+as.Date(today_date,"%m/%d/%Y")
+
+```
+
+# Using new function in our data
+
+```{r}
+"Jul 10, 2024"
+pres <- pres %>%
+  mutate(StartDate_cleaned = as.Date(StartDate,'%m/%d/%Y'))
+
+pres %>%
+  ggplot(aes(x = StartDate_cleaned)) + 
+  geom_bar()
+
+# Treat as numeric
+pres %>%
+  ggplot(aes(x = StartDate_cleaned)) + 
+  geom_histogram()
+```
+
+# Multivariate:
+
+```{r}
+pres %>%
+  ggplot(aes(x = StartDate_cleaned,
+             y = Biden)) + 
+  geom_point(color = 'blue') + 
+  geom_smooth(color = 'blue') + 
+  geom_hline(yintercept = 51,
+             color = 'blue',
+             linetype='dashed') + 
+  geom_point(color = 'red',
+             aes(y = Trump)) + 
+  geom_smooth(color = 'red',
+              aes(y = Trump)) + 
+  geom_hline(yintercept = 47,
+             color = 'red',
+             linetype='dashed')
+```
+
+# Creating new variable: prediction error
+
+```{r}
+# Create such that + ==> overestimate, - ==> underestimate
+pres <- pres %>%
+  mutate(bidenError = Biden - DemCertVote,
+         trumpError = Trump - RepCertVote)
+
+# Recreate plot
+pres %>%
+  ggplot(aes(x = StartDate_cleaned,
+             y = bidenError)) + 
+  geom_point(color = 'blue') + 
+  geom_smooth(color = 'blue') + 
+  geom_point(color = 'red',
+             aes(y = trumpError)) + 
+  geom_smooth(color = 'red',
+              aes(y = trumpError)) + 
+  geom_hline(yintercept = 0,linetype = 'dashed') + 
+  labs(x = 'Polling date',
+       y = 'Polling error',
+       title = 'Comparison of Biden and Trump Polling Errors Overtime',
+       subtitle = '528 polls from April to November 2020')
+```
+
+# Introducing midterm exam data
+
+```{r}
+fn <- read_rds("https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/fn_cleaned_final.rds")
+
+fn
+
+summary(fn)
+
+fn %>%
+  count(mental_state)
+
+View(fn)
+
+fn %>%
+  ggplot(aes(x = mental_state,
+             y = placed)) + 
+  geom_boxplot()
+```
+
+# Bootstrap
+```{r}
+set.seed(123)
+bsRes <- NULL
+for(i in 1:100) {
+  simulation <- fn %>%
+    sample_n(size = nrow(.),
+             replace = T)
+  
+  answer <- simulation %>%
+    group_by(mental_state) %>%
+    summarise(avg_placed = mean(placed)) %>%
+    mutate(sim_number = i)
+  
+  bsRes <- bsRes %>%
+    bind_rows(answer)
+}
+
+# Result
+bsRes_wide <- bsRes %>%
+  pivot_wider(names_from = "mental_state",
+              values_from = "avg_placed")
+
+bsRes_wide %>%
+  mutate(sober_better = ifelse(sober < high,
+                               1,
+                               0)) %>%
+  summarise(confidence = mean(sober_better))
+
+# Visualize
+bsRes %>%
+  ggplot(aes(x = avg_placed,
+             fill = mental_state)) + 
+  geom_density(alpha = .3)
+
+bsRes_wide %>%
+  mutate(placed_diff = high - sober) %>%
+  ggplot(aes(x = placed_diff)) + 
+  geom_density() + 
+  geom_vline(xintercept = 0,linetype = 'dashed')
+```
+
+
