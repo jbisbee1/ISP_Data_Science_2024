@@ -1,0 +1,267 @@
+---
+title: "Midterm Exam"
+author: "[YOUR NAME]"
+date: "Due Date: 2024-07-11"
+output:
+  html_document: default
+  pdf_document: default
+subtitle: Summer 2024
+institute: Seoul National University
+---
+
+```{r,include=F}
+knitr::opts_chunk$set(error=TRUE)
+```
+
+
+## Overview
+
+This is your midterm exam. It consists of five questions plus one additional extra credit question. 
+
+## Survey EC
+The extra credit is awarded if you respond to a short survey about this course. The survey is not part of SNU's official teaching evaluations. I use it to help me improve the course in the second half of the month, and respond to your specific needs. To receive the extra credit, take the survey and then copy the secret completion code in the space provided at the bottom of the survey. The survey is **anonymous**, meaning that the completion code is the same for everyone (so please don't share it!). I won't know what you wrote, so please be as honest as possible.
+
+## Grading
+
+The exam is worth 15 total points. The point values are indicated next to each question in brackets. The extra credit is worth 3 points, meaning that the maximum possible score is 120%.
+
+## Resources
+
+You are permitted to rely on course resources from the first part of the summer intensive session. These include all lecture slides, problem sets, answer keys, homeworks, and lecture notes, as well as any and all posts to Campuswire. You can use ChatGPT as long as you copy the questions you asked into your answers to each question. 
+
+You are **not** permitted to review recordings during the midterm.
+
+## Codebook
+
+The midterm uses the `fn_cleaned_final.rds` dataset. This is data about the popular video game Fortnite, collected over the course of 2019. The codebook is reproduced below:
+
+| Name           | Description                                                                                                                                                                                             |
+|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| placed         | The position between 1 and 100 that the player finished the game (lower is better)        |
+| mental_state   | Whether the player was drunk or sober when they played                                    |
+| eliminations   | How many times they killed an enemy player                                                |
+| assists        | How many times they helped a teammate kill an enemy player                                |
+| accuracy       | The proportion of total shots that hit an enemy player                                    |
+| hits           | The number of shots that hit an enemy player                                              |
+| head_shots     | The number of shots that hit an enemy player in the head                                  |
+| damage_taken   | The amount of damage the player received from enemy players                               |
+
+## Logistics
+
+You have three hours to complete this exam, although it is designed to only take one hour. You must upload the PDF of the knitted output to the eTL website under the assignment labelled "midterm". If you need help converting to a PDF, see [this tutorial](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_0_HELPER.pdf).
+
+**Good luck!**
+
+*Copy the link to ChatGPT you used here: _________________
+
+
+## Question 0
+*Require `tidyverse` and load the `fn_cleaned_final.rds` data to an object called `fn`.*
+
+```{r}
+# Require tidyverse
+require()
+
+# Load the data from Github
+fn <- read_rds()
+```
+
+## Question 1 [1 point]
+*How many observations are in this dataset? How many variables? What is the unit of analysis?*
+
+```{r}
+# INSERT CODE HERE: all you need to do is look at the dataset
+```
+
+> Write answer here
+
+
+## Question 2 [3 points]
+*Research Question: What is the relationship between mental state and accuracy? Why do you think so? Based on your theory, what is the $X$ and the $Y$ variable?*
+
+> Write answer here
+
+## Question 3 [4 points]
+*Following the 3-step process discussed in class, provide univariate visualizations of the $X$ and the $Y$ variable (steps 1 and 2). Why did you choose the `geom_...()` that you did for each variable? Are there alternative `geom_...()` choices that would also work?*
+
+```{r}
+# Step 1: Look
+fn %>%
+  select(...,
+         ...)
+
+glimpse(fn %>%
+          select(...,
+                 ...))
+
+# Step 2: Visualize X variable
+fn %>%
+  ggplot(aes(x = ...) + # Put X variable on x-axis
+  geom_...() +          # Choose the best geom_...()
+  labs(x = '',          # Make sure to give it descriptive labels! (Remember the grandmother rule)
+       y = '',
+       title = '',
+       subtitle = '')
+
+# Visualize Y variable
+fn %>%
+  ggplot(aes(x = ...) + # Put Y variable on x-axis
+  geom_...() +          # Choose the best geom_...()
+  labs(x = '',          # Make sure to give it descriptive labels! (Remember the grandmother rule)
+       y = '',
+       title = '',
+       subtitle = '')
+
+```
+
+> Write answer here
+
+*Then analyze the data in two ways. First, calculate the average accuracy by mental state. Based on this comparison, what do you conclude? Does the data support your hypothesis?*
+
+```{r}
+fn %>%
+  group_by(...) %>%  # Group by variable goes here
+  summarise(...)     # Create a new variable that contains the average accuracy here (use mean()!)
+```
+
+> Write answer here
+
+*Second, create a multivariate visualization of the relationship between mental state and accuracy. As before, explain why you chose the `geom_...()` you did, and discuss whether another approach would also work.* 
+
+```{r}
+# Approach #1
+fn %>%
+  ggplot(aes(x = ...,     # Put the X variable on the x-axis
+             y = ...)) +  # Put the X variable on the x-axis
+  geom_...() +            # Choose the best geom_...()
+  labs(x = '',            # Make sure to give it descriptive labels! (Remember the grandmother rule)
+       y = '',
+       title = '',
+       subtitle = '')
+
+# Approach #2
+fn %>%
+  ggplot(aes(x = ...,                               # Which variable goes on the x-axis?
+             fill = ...)) +                         # Which variable determines the fill color?
+  geom_...(alpha = .3) +                            # What geom_...() works best?
+  geom_vline(data = fn %>%                          # OPTIONAL: can you draw two colored vertical lines?
+               group_by(...) %>%
+               summarise(...),
+             aes(xintercept = ...,color = ...)) + 
+  labs(x = '',                                      # Make sure to give it descriptive labels! (Remember the grandmother rule)
+       y = '',
+       fill = '',
+       color = '',
+       title = '',
+       subtitle = '')
+```
+
+> Write answer here
+
+*Finally, based on all the preceding results, what do you conclude about the research question? Is there a relationship between a player's mental state and their accuracy in the video game Fortnite?*
+
+> Write answer here
+
+
+## Question 4 [4 points]
+*How confident are you in your answer? Use bootstrapped simulations to express your uncertainty as a percentage. Use 100 simulations and set the `size` of each sample equal to the total number of observations in the dataset.*
+
+```{r}
+set.seed(123)                      # Set the seed first
+bsRes <- NULL                      # Then instantiate an empty object
+for(...) {                         # Create a for() loop with an iterator named i
+  simulation <- fn %>%             # Randomly sample the data
+    sample_n(size = ...,           # Size should be the size of the original data
+             replace = ...)        # Make sure to replace observations when you sample them!
+  
+  answer <- simulation %>%         # Using this simulated reality, calculate the average accuracy by mental state
+    group_by(...) %>%
+    summarise(...) %>%
+    mutate(sim_number = ...)       # Don't forget to save the simulation number!
+  
+  bsRes <- bsRes %>%               # Finally, add this new answer to the result
+    bind_rows(...)
+}
+
+# Create a wide version of the bootstrapped results
+bsRes_wide <- bsRes %>%
+  pivot_wider(names_from = ...,    # Which variable will the new column names come from? (Make sure to use "")
+              values_from = ...)   # Which variable will the values come from? (Make sure to use "")
+
+# Calculate the confidence as the proportion of bootstraps where sober players are better
+bsRes_wide %>%
+  mutate(sober_better = ifelse(...)) %>%  # Create a binary variable of 1 if the sober players are better, and 0 otherwise
+  summarise(conf = ...)                   # Calculate the proportion of times sober players are better
+```
+
+> Write answer here
+
+*Finally, let's visualize the bootstrapped results. First, create a plot of two densities side-by-side, colored by the $X$ variable.*
+
+```{r}
+bsRes %>%
+  ggplot(aes(x = ...,         # Which variable goes here?
+             fill = ...)) +   # Which variable goes here?
+  geom_...() +                # Which geom_...() should we use?
+  labs(x = '',                # Make sure to give it descriptive labels! (Remember the grandmother rule)
+       y = '',
+       fill = '',
+       title = '',
+       subtitle = '')
+```
+
+*Second, create a single density describing the difference in accuracy by mental state, with a vertical dashed line at zero, and a second vertical solid line at the average difference in accuracy. What is our best guess at the difference between drunk and sober player accuracy?*
+
+```{r}
+bsRes_wide <- bsRes_wide %>%
+  mutate(diff = ...)                    # Create a new variable that is the difference between sober and drunk players
+
+bsRes_wide %>%
+  ggplot(aes(x = ...)) +                # Which variable goes on the x-axis?
+  geom_...() +                          # Which geom_...() works best?
+  geom_vline(xintercept = ...,          # Create a vertical dashed line at zero
+             linetype = ...) + 
+  geom_vline(xintercept = mean(...))    # Create a vertical solid line at the average difference
+  labs(x = '',                          # Make sure to give it descriptive labels! (Remember the grandmother rule)
+       y = '',
+       title = '',
+       subtitle = '') 
+  
+mean(...)                               # Calculate the overall average difference
+```
+
+> Write answer here
+
+## Question 5 [3 points]
+
+*Now let's look at a different variable: `eliminations`. This captures how many times in a game the player kills another player. Does your theory change? Why or why not?*
+
+> Write answer here
+
+*Provide a univariate visualization for `eliminations`, choosing the best `geom_...()`, and then create a multivariate visualization showing the relationship between `eliminations` and `mental_state`. In addition, calculate average eliminations by mental state. Does the data support your hypothesis?*
+
+```{r}
+# INSERT CODE HERE: You can refer to the code you used above to answer this. You've got this!
+```
+
+> Write answer here
+
+*Finally, use 100 bootstrapped simulations with size set to the total number of observations in the dataset to express your confidence. You don't need to visualize these results, just provide the confidence number.*
+
+```{r}
+# INSERT CODE HERE: You can refer to the code you used above to answer this. You've got this!
+```
+
+> Write answer here
+
+
+## Extra Credit: Survey [3 points]
+
+Please complete this **anonymous** course evaluation. This does not influence Professor Bisbee's career or position in the university and will only be used to improve the course. You can find the anonymous survey [here](https://nyu.qualtrics.com/jfe/form/SV_b7t5vqhhbalgGZ8). Upon completing the survey, you will be given a completion code. To receive the extra credit points, please paste the completion code into the space provided below.
+
+```{r}
+# PASTE COMPLETION CODE HERE
+```
+
+
+**NOTE**: There is only one completion code to ensure that all responses are anonymized and can't be linked back to the midterm exams. To prevent students from sharing the code with their friends to get the 3 extra credit points without completing the survey, these 3 points are only provided if the number of midterms with the completion code *exactly equals the number of survey responses*. In other words, if there are 25 exams with the completion code, but only 24 completed surveys, **all students will forfeit their extra credit points**. The purpose of this strict rule is to disincentivize the sharing of this code either by those who would fill out the survey and then share the code, or by those who would ask to be given the code without filling out the survey. 
