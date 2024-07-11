@@ -20,7 +20,6 @@ output:
       countIncrementalSlides: false
       slideNumberFormat: "%current%"
       #ratio: "16:9"
-
 ---
 
 ```{css,echo = F}

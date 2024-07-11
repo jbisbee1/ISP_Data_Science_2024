@@ -264,7 +264,7 @@ for(i in 1:1000) { # Loop 1,000 times
 bsRes %>%
   summarise(, # Calculate the confidence for rebounds being greater than zero
             , # Calculate the confidence for turnovers being greater than zero
-            )
+            ) # Calculate the confidence for % field goals being greater than zero
 ```
 
 > Write answer here
