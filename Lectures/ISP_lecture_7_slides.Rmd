@@ -68,42 +68,7 @@ knitr::knit_hooks$set(chunk = function(x, options) {
 
   - Analyze with **conditional means**
   
----
 
-# Reminder of the **Process**
-
---
-
-1. Determine variable **type**
-
---
-
-  - I.e., categorical (ordered, unordered, binary) or continuous
-  
-  - In `R` terms: `chr`, `fct` for categorical, `dbl` for continuous
-  
---
-
-2. Type informs **univariate analysis**
-
---
-
-  - I.e., histograms for continuous, barplots for categorical
-  
---
-
-3. Combination of types informs **conditional analysis**
-
---
-
-  - Categorical X Categorical: proportions by categories (`geom_bar`)
-  
-  - Binary X Continuous: histograms by categories (`geom_histogram` / `geom_density`)
-  
-  - Categorical X Continuous: distributions by categories (`geom_boxplot` / `geom_violin`)
-  
-  - Continuous X Continuous: scatter plots (`geom_point`)
-  
 ---
 
 # What is regression?
@@ -486,7 +451,7 @@ ggsave(plot = p,filename = paste0('./figs/regPlotFirst_6.png'),device = 'png',wi
 
 --
 
-- Red line on scatter plot of spending and wages: $Y = 12 + 2*X$
+- Red line on scatter plot of spending and wages: $Y = \underbrace{12}_{\alpha} + \underbrace{2}_{\beta}*X$
 
 --
 
@@ -602,15 +567,15 @@ glimpse(debt)
 
 --
 
-  1. Look at your data to identify missingness (**Wrangling: Lecture 5**)
+  1. Look at your data to identify missingness (**Wrangling: Lecture 3**)
   
-  2. **Univariate** visualization of your variables (**Lecture 6**)
+  2. **Univariate** visualization of your variables (**Lecture 4**)
   
-  3. **Multivariate** visualization of your variables (**Lectures 7-10**)
+  3. **Multivariate** visualization of your variables (**Lecture 5**)
   
   4. **Regression** (today)
   
-  5. Evaluation of **errors** (next lecture)
+  5. Evaluation of **errors** (today)
 
 ---
 
@@ -622,7 +587,7 @@ glimpse(debt)
 
 1. **Substantive:** external validity
 
-2. **Technical:** cross validation won't work! (Wednesday's lecture)
+2. **Technical:** cross validation won't work!
 
 --
 
@@ -946,7 +911,7 @@ p7
   
   - Just need to tell it what is $Y$ (`md_earn_wne_p6`) and $X$ (`sat_avg`)
   
-  - The tilde (`~`) is `R`'s version of the equals sign
+  - The tilde (`~`) is `R`'s version of the equals sign **in a regression equation**
   
 --
 
@@ -1022,7 +987,7 @@ summary(model_earn_sat)
   
   - This is 1 minus confidence
   
-  - The lower the p-value, the more confident we are that the `Estimate` is not zero
+  - The lower the p-value, the **more** confident we are that the `Estimate` is **not zero**
   
 ---
 
@@ -1031,6 +996,18 @@ summary(model_earn_sat)
 ```{r}
 summary(model_earn_sat)
 ```
+
+---
+
+# Step 4: Interpretation
+
+- Kinda ugly? Use `tidy()` function from the `broom` package
+
+```{r}
+require(broom)
+tidy(model_earn_sat)
+```
+
 
 ---
 
@@ -1214,7 +1191,7 @@ mv %>%
 ```{r,warning=F}
 mv %>%
   select(title,gross,budget) %>%
-  gather(metric,dollars,-title) %>%
+  pivot_longer(names_to = "metric",values_to = "dollars",cols = c("gross","budget")) %>%
   ggplot(aes(x = dollars,color = metric)) + 
   geom_density()
 ```
@@ -1255,7 +1232,7 @@ mv <- mv %>%
 ```{r,warning=F}
 mv %>%
   select(title,gross_log,budget_log) %>%
-  gather(metric,log_dollars,-title) %>%
+  pivot_longer(names_to = "metric",values_to = "log_dollars",cols = c("gross_log","budget_log")) %>%
   ggplot(aes(x = log_dollars,color = metric)) + 
   geom_density()
 ```
@@ -1332,7 +1309,7 @@ pSimple +
 
 ```{r}
 m <- lm(gross_log ~ budget_log,data = mv)
-summary(m)
+tidy(m)
 ```
 
 ---
@@ -1351,7 +1328,7 @@ summary(m)
 
 --
 
-$gross\_log = 1.26 + 0.96 * budget\_log$
+$$gross\_log = \underbrace{1.26}_{\alpha} + \underbrace{0.96}_{\beta} * budget\_log$$
 
 ---
 
@@ -1379,11 +1356,11 @@ exp(1.26107)
 
 --
 
-  1. `log(Y) ~ X`: 1 unit change in $X$ &rarr; `(exp(b)-1)*100`% change in $Y$
+  1. `log(Y) ~ X`: 1 unit change in $X$ &rarr; $(exp(\beta)-1)*100$ percent change in $Y$
   
-  2. `Y ~ log(X)`: 1% increase in $X$ &rarr; `b/100` unit change in $Y$
+  2. `Y ~ log(X)`: 1% increase in $X$ &rarr; $\beta/100$ unit change in $Y$
   
-  3. `log(Y) ~ log(X)`: 1% increase in $X$ &rarr; `b`% change in $Y$
+  3. `log(Y) ~ log(X)`: 1% increase in $X$ &rarr; $\beta$ percent change in $Y$
   
 --
 
@@ -1569,7 +1546,11 @@ mv_analysis %>%
 
 - **M**ean: average these squared errors
 
+--
+
 - **R**oot: take their square root (.blue[un-exaggerate])
+
+--
 
 $$RMSE = \sqrt{\frac{1}{n}\sum_{i = 1}^n(Y_i - \hat{Y}_i)^2}$$
 
@@ -1800,23 +1781,19 @@ scales::dollar(exp(c(pred_gross_log_ub,pred_gross_log_lb)))
 
 ```{r}
 set.seed(1021)
-# Create list of row numbers at random
-inds <- sample(1:nrow(mv_analysis),
-               size = round(nrow(mv_analysis)/2),
-               replace = F) 
+# Sample our data WITHOUT replacement
+train <- mv_analysis %>%
+  sample_n(size = round(nrow(.)*.5),
+           replace = F)
 
-# Use slice(inds) to get training data
-train <- mv_analysis %>% 
-  slice(inds)
-
-# Use slice(-inds) to get test data
+# New function...remove all the rows that are the same as train
 test <- mv_analysis %>%
-  slice(-inds)
+  anti_join(train)
 ```
 
 --
 
-- We now have two datasets of roughly the same number of observations!
+- We now have two datasets of roughly the same number of observations, but none of them are the same!
 
 ---
 
@@ -1866,16 +1843,18 @@ rmse
 
 # CV to Calculate RMSE
 
-```{r}
+```{r,message=F}
 set.seed(123)
 bsRes <- NULL
 for(i in 1:100) {
-  inds <- sample(1:nrow(mv_analysis),
-                 size = round(nrow(mv_analysis)/2),
-                 replace = F)
+  # Create training dataset
+  train <- mv_analysis %>%
+    sample_n(size = round(nrow(.)*.5),
+           replace = F)
   
-  train <- mv_analysis %>% slice(inds)
-  test <- mv_analysis %>% slice(-inds)
+  # Create test dataset
+  test <- mv_analysis %>%
+    anti_join(train)
   
   mTrain <- lm(gross_log ~ budget_log,train)
   
@@ -1884,7 +1863,6 @@ for(i in 1:100) {
   rmse <- sqrt(mean((test$gross_log - test$preds)^2,na.rm=T))
   bsRes <- c(bsRes,rmse)
 }
-
 mean(bsRes)
 ```
 
@@ -1917,7 +1895,7 @@ data.frame(rmseBS = bsRes) %>%
   - ...but still **protects** against overfitting
   
 ```{r}
-inds <- sample(1:nrow(mv_analysis),
-               size = round(nrow(mv_analysis)*.8), #<<
-               replace = F)
+train <- mv_analysis %>%
+  sample_n(size = round(nrow(mv_analysis)*.8), #<<
+           replace = F)
 ```

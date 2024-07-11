@@ -1,0 +1,22 @@
+---
+title: "Test Printing Tables"
+output: html_document
+date: "2024-07-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Set options to show all rows of tibbles
+options(tibble.print_max = Inf)
+
+require(tidyverse)
+
+fn <- read_rds('https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/fn_cleaned_final.rds')
+
+print(fn %>%
+  slice(1:25))
+```
+

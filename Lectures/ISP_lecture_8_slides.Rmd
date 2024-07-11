@@ -20,14 +20,13 @@ output:
       countIncrementalSlides: false
       slideNumberFormat: "%current%"
       #ratio: "16:9"
-
 ---
 
 ```{css,echo = F}
-.small .remark-code { /*Change made here*/
+.small .remark-code { 
   font-size: 85% !important;
 }
-.tiny .remark-code { /*Change made here*/
+.tiny .remark-code { 
   font-size: 50% !important;
 }
 ```
@@ -192,8 +191,9 @@ pClean + geom_smooth(method = 'lm')
 # Step 4: Regression!
 
 ```{r}
+require(broom) # Make the output nicer looking
 m <- lm(gross_log ~ budget_log,data = mv)
-summary(m)
+tidy(m)
 ```
 
 
@@ -243,14 +243,13 @@ mv %>%
 
 # Step 5.3: Cross Validated RMSE
 
-```{r}
+```{r,message=F}
 set.seed(123)
 rmseBudget <- NULL
 for(i in 1:100) {
-  inds <- sample(1:nrow(mv),size = round(nrow(mv)/2),replace = F)
-  
-  train <- mv %>% slice(inds)
-  test <- mv %>% slice(-inds)
+  train <- mv %>%
+    sample_n(size = round(nrow(mv)*.5),replace = F)
+  test <- mv %>% anti_join(train)
   
   mTrain <- lm(gross_log ~ budget_log,train)
   
@@ -417,13 +416,13 @@ p
 
 - Do we improve our model with `score`?
 
-```{r}
+```{r,message=F}
 set.seed(123)
 bsRes <- NULL
 for(i in 1:100) {
-  inds <- sample(1:nrow(mv),size = round(nrow(mv)/2),replace = F)
-  train <- mv %>% slice(inds)
-  test <- mv %>% slice(-inds)
+  train <- mv %>%
+    sample_n(size = round(nrow(mv)*.8),replace = F)
+  test <- mv %>% anti_join(train)
   
   mB <- lm(gross_log ~ budget_log,train)
   mS <- lm(gross_log ~ score,train)
@@ -440,35 +439,6 @@ for(i in 1:100) {
 }
 ```
 
----
-
-# ASIDE: alternative `code`
-
-- `sample_n()` and `anti_join()`
-
-```{r}
-set.seed(123)
-bsRes <- NULL
-for(i in 1:100) {
-  train <- mv %>%
-    sample_n(size = round(nrow(.)*.8),replace = F)
-  test <- mv %>%
-    anti_join(train) #<<
-
-  mB <- lm(gross_log ~ budget_log,train)
-  mS <- lm(gross_log ~ score,train)
-  mC <- lm(gross_log ~ budget_log + score,train)
-  
-  bsRes <- test %>%
-    mutate(pB = predict(mB,newdata = test),
-           pS = predict(mS,newdata = test),
-           pC = predict(mC,newdata = test)) %>%
-    summarise(Budget = sqrt(mean((gross_log - pB)^2,na.rm=T)),
-              Score = sqrt(mean((gross_log - pS)^2,na.rm=T)),
-              Combined = sqrt(mean((gross_log - pC)^2,na.rm=T))) %>%
-    bind_rows(bsRes) 
-}
-```
 
 ---
 
@@ -540,11 +510,7 @@ mv %>%
 
 ```{r}
 mv <- mv %>%
-  mutate(bechdel_bin = ifelse(bechdel_score == 3,1,0)) %>%
-  mutate(bechdel_factor=recode_factor(bechdel_bin,
-                                      `1`="Pass",
-                                      `0`="Fail",
-                                      ))
+  mutate(bechdel_bin = ifelse(bechdel_score == 3,"Pass","Fail"))
 ```
 
 ---
@@ -556,14 +522,14 @@ mv <- mv %>%
 - We can add the binary factor to our regression
 
 ```{r}
-summary(lm(gross_log ~ bechdel_factor,mv))
+tidy(lm(gross_log ~ bechdel_bin,mv))
 ```
 
 ---
 
 # Regression
 
-- Coefficient is positive
+- Coefficient is negative
 
 --
 
@@ -571,7 +537,7 @@ summary(lm(gross_log ~ bechdel_factor,mv))
 
 --
 
-  - Movies that fail make more money...
+  - Movies that pass make less money...
   
 --
 
@@ -579,7 +545,7 @@ summary(lm(gross_log ~ bechdel_factor,mv))
   
 --
 
-  - Movies that pass the Bechdel Test
+  - Movies that fail the Bechdel Test
   
 --
 
@@ -616,7 +582,7 @@ summary(lm(gross_log ~ bechdel_factor,mv))
 - So we want to "control" for budget by adding it to our regression
 
 ```{r}
-mBechCtrl <- lm(gross_log ~ budget_log + bechdel_factor,mv)
+mBechCtrl <- lm(gross_log ~ budget_log + bechdel_bin,mv)
 ```
 
 ---
@@ -624,7 +590,7 @@ mBechCtrl <- lm(gross_log ~ budget_log + bechdel_factor,mv)
 # Regression
 
 ```{r}
-summary(mBechCtrl)
+tidy(mBechCtrl)
 ```
 
 ---
@@ -658,7 +624,7 @@ mvAnalysis <- mv %>%
 # Categorical
 
 ```{r}
-summary(lm(gross_log ~ rating,mvAnalysis))
+tidy(lm(gross_log ~ rating,mvAnalysis))
 ```
 
 ---
@@ -688,16 +654,14 @@ mRating2 <- lm(gross_log ~ rating,mvAnalysis)
 # Categorical
 
 ```{r}
-summary(mRating2)
+tidy(mRating2)
 ```
 
 ---
 
 # Cross Validation
 
-- This is why `sample_n()` is useful
-
-```{r,warning = F}
+```{r,warning = F,message=F}
 set.seed(123)
 rmseRes_rating <- NULL
 for(i in 1:100) {
@@ -715,4 +679,166 @@ for(i in 1:100) {
 rmseRes_rating %>%
   summarise(rmse = mean(rmse))
 ```
+
+---
+
+# BREAK
+
+---
+
+# Practice
+
+- How to interpret a regression table:
+
+  1. Check if any of the variables are logged
+  
+  2. Check if the $X$ variable is categorical
+  
+  3. (Coming soon) Check if the $Y$ variable is binary
+  
+---
+
+# Practice: 1, 2, 3 = "No"
+
+- If 1, 2 & 3 are "No", then
+
+--
+
+  - $\alpha$ is the value of $Y$ when $X$ is zero
+  
+  - $\beta$ is the amount $Y$ increases when $X$ increases by 1
+  
+---
+
+# Practice: 1, 2, 3 = "No"
+
+- RQ: What is the relationship between head shots and eliminations?
+
+--
+
+```{r}
+fn <- read_rds('https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/fn_cleaned_final.rds')
+tidy(lm(eliminations ~ head_shots,fn))
+```
+
+---
+
+# Practice: 1, 2, 3 = "No"
+
+- **NB**: Pay attention to the units of $X$ and $Y$!
+
+- RQ: What is the relationship between accuracy and head shots?
+
+--
+
+```{r}
+tidy(lm(head_shots ~ accuracy,fn))
+```
+
+---
+
+# Practice: Logged = "Yes"
+
+- Then need to remember THESE rules:
+
+1. `log(Y) ~ X`: 1 unit change in $X$ &rarr; $(exp(\beta)-1)*100$ % change in $Y$
+  
+2. `Y ~ log(X)`: 1% increase in $X$ &rarr; $\beta/100$ unit change in $Y$
+  
+3. `log(Y) ~ log(X)`: 1% increase in $X$ &rarr; $\beta$ % change in $Y$
+
+---
+
+# Practice: Logged = "Yes"
+
+1. `log(Y) ~ X`: 1 unit change in $X$ &rarr; $(exp(\beta)-1)*100$ % change in $Y$
+  
+- RQ: What is the relationship between movie gross and IMDB score?
+
+--
+
+```{r}
+tidy(lm(gross_log ~ score,mv))
+```
+
+---
+
+# Practice: Logged = "Yes"
+
+1. `log(Y) ~ X`: 1 unit change in $X$ &rarr; $(exp(\beta)-1)*100$ % change in $Y$
+  
+2. `Y ~ log(X)`: 1% increase in $X$ &rarr; $\beta/100$ unit change in $Y$
+
+RQ: What is the relationship between IMDB score and budget?
+
+--
+
+```{r}
+tidy(lm(score ~ budget_log,mv))
+```
+
+---
+
+# Practice: Logged = "Yes"
+
+1. `log(Y) ~ X`: 1 unit change in $X$ &rarr; $(exp(\beta)-1)*100$ % change in $Y$
+  
+2. `Y ~ log(X)`: 1% increase in $X$ &rarr; $\beta/100$ unit change in $Y$
+  
+3. `log(Y) ~ log(X)`: 1% increase in $X$ &rarr; $\beta$ % change in $Y$
+
+RQ: What is the relationship between gross and budget?
+
+--
+
+```{r}
+tidy(lm(gross_log ~ budget_log,mv))
+```
+
+---
+
+# Practice: Categorical $X$ = "Yes"
+
+- RQ: What is the relationship between a movie's PG rating and it's IMBD rating?
+
+```{r}
+tidy(lm(score ~ rating,mv))
+```
+
+---
+
+# Practice: Categorical $X$ = "Yes"
+
+- RQ: What is the relationship between mental state and accuracy (Fortnite data)?
+
+```{r}
+tidy(lm(accuracy ~ mental_state,fn))
+```
+
+---
+
+# Aside: scientific notation
+
+- What is `7.47e-4`?
+
+--
+
+  - Decimal, then 4 zeros, then the number
+  
+  - `0.0000747`
+  
+--
+
+- What is `1.39e-1`?
+
+--
+
+  - `0.0139`
+
+---
+
+# Practice: Categorical $Y$ = "Yes"
+
+- Next class!
+
 

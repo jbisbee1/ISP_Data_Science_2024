@@ -65,7 +65,8 @@ The final grade is the sum of total points defined as follows:
 
 Letter grades are determined as per the standard SNU grading system, reproduced below:
 
-- A: 94+
+- A+: 97+
+- A: 94-96
 - A-: 90-93
 - B+: 87-89
 - B: 84-86
