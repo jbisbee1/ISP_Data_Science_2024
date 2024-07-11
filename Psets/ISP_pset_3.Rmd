@@ -224,7 +224,7 @@ for(i in 1:1000) { # Loop 1,000 times
     group_by() %>% # Group by the location of the game
     summarise() %>% # Calculate the average points (pts)
     ungroup() %>% # Best practices!
-    spread() %>% # Spread the data to get one column for average points at home and another for average points away
+    pivot_wider() %>% # Pivot the data to get one column for average points at home and another for average points away
     mutate(, # Calculate the difference between home and away points
            ) %>% # Save the bootstrap index
     bind_rows(bsRes) # Append the result to the empty object from line 133
