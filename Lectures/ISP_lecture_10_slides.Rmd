@@ -497,7 +497,7 @@ vimpLass %>%
 # Another example: Wine!
 
 ```{r}
-wine <- read_rds(file = "https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/wine_taste.rds")
+wine <- read_rds(file = "https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/wine_quality_red.rds")
 
 View(wine)
 ```
@@ -595,7 +595,41 @@ wine %>%
 # Random Forest it!
 
 ```{r}
-ranger()
+mRang <- ranger(taste~.,wine %>%
+         mutate(taste = factor(taste,
+                               levels = c('Poor','Decent','Tasty'))) %>%
+         select(-quality),num.trees = 5000,mtry = 8)
+```
+
+---
+
+# Random Forest
+
+```{r}
+mRang$confusion.matrix
+```
+
+---
+
+# Random Forest
+
+```{r}
+mRang <- ranger(taste~.,wine %>%
+         mutate(taste = factor(taste,
+                               levels = c('Poor','Decent','Tasty'))) %>%
+         select(-quality),num.trees = 5000,mtry = 8,probability = T)
+toEval <- wine %>%
+  mutate(prob_poor = mRang$predictions[,1],
+         prob_decent = mRang$predictions[,2],
+         prob_tasty = mRang$predictions[,3]) %>%
+  mutate(truth_poor = factor((taste == 'Poor')+0,levels = c('1','0')),
+         truth_decent = factor((taste == 'Decent')+0,levels = c('1','0')),
+         truth_tasty = factor((taste == 'Tasty')+0,levels = c('1','0'))) %>%
+  select(matches('prob|truth'))
+
+roc_auc(toEval,truth_poor,prob_poor)
+roc_auc(toEval,truth_decent,prob_decent)
+roc_auc(toEval,truth_tasty,prob_tasty)
 ```
 
 
