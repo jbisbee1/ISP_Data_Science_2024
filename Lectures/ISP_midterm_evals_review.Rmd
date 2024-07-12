@@ -1,0 +1,391 @@
+---
+title: "Midterm Evaluations"
+subtitle: "Plan for second half"
+author: "Prof. Bisbee"
+institute: "Vanderbilt University"
+date: "Slides Updated: `r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    # self_contained: true
+    chakra: libs/remark-latest.min.js
+    lib_dir: libs
+    css:
+      - default
+      - css/lexis.css
+      - css/lexis-fonts.css
+    #seal: false
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      #ratio: "16:9"
+---
+
+```{r,include=F}
+options(width=60)
+knitr::opts_chunk$set(fig.align='center',fig.width=9,fig.height=5,dev = 'svg')
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r,echo=F,message=F,warning=F}
+require(tidyverse)
+evals <- read_csv('../NFGH/midterm_evals/DS1000 Midterm Course Evaluation_July 11, 2024_19.53.csv')
+
+colLabs <- data.frame(col = colnames(evals),
+                      label = as.character(data.frame(evals)[1,]),
+                      stringsAsFactors = F)
+
+evals <- read_csv('../NFGH/midterm_evals/DS1000 Midterm Course Evaluation_July 11, 2024_19.53.csv',
+                  skip = 3,col_names = colLabs$col)
+
+toanal <- evals %>%
+  select(StartDate,duration = `Duration (in seconds)`,matches('Q\\d'),
+         ResponseId) %>%
+  pivot_longer(names_to = 'col',
+               values_to = 'response',
+               cols = -c(StartDate,duration,ResponseId)) %>%
+  left_join(colLabs) %>%
+  mutate(id = as.numeric(as.factor(ResponseId)),
+         date = as.Date(StartDate)) %>%
+  mutate(semester = factor(ifelse(date < as.Date('2022-12-31'),'Fall 22',
+                                  ifelse(date < as.Date('2023-06-01'),'Spring 23',
+                                         ifelse(date < as.Date('2023-12-31'),'Fall 23',
+                                                ifelse(date < as.Date('2024-06-01'),'Spring 24','ISP Summer')))),
+                           levels = c('Fall 22','Spring 23','Fall 23','Spring 24','ISP Summer')),
+         response_fct = factor(response,
+                           levels = c('Strongly Disagree','Somewhat disagree',
+                                      'Neither agree nor disagree','Somewhat agree',
+                                      'Strongly agree')),
+         agree = ifelse(grepl(' agree$',response),1,0),
+         disagree = ifelse(grepl('(D|d)isagree$',response),1,0))
+```
+
+# Midterm evaluations
+
+- Started asking these my second semester teaching (spring 2023)
+
+- Normally, this class is 200 students and spread out over a semester
+
+- Step 1? **Look** at the data
+
+--
+
+```{r,echo=F}
+toanal %>%
+  group_by(semester) %>%
+  summarise(nResp = length(unique(id))) %>%
+  ungroup() %>%
+  mutate(semester = factor(semester,
+                           levels = c('Fall 22','Spring 23','Fall 23','Spring 24','ISP Summer'))) %>%
+  ggplot(aes(x = semester,y = nResp,
+             label = nResp)) + 
+  geom_bar(stat = 'identity') + 
+  geom_text(vjust = 1,color = 'white') + 
+  labs(x = 'Semester',
+       y = 'Number of responses',
+       title = 'Midterm evaluations: Data Science with Prof Bisbee',
+       subtitle = 'Number of responses to survey')
+```
+
+---
+
+# Midterm evaluations
+
+- Started asking these my second semester teaching (spring 2023)
+
+- Normally, this class is 200 students and spread out over a semester
+
+- Step 1? **Look** at the data
+
+```{r,echo=F}
+toanal %>%
+  group_by(semester) %>%
+  summarise(nResp = length(unique(id))) %>%
+  ungroup() %>%
+  mutate(class_size = ifelse(semester == 'ISP Summer',22,197)) %>%
+  mutate(share = nResp / class_size) %>%
+  ggplot(aes(x = semester,y = share,
+             label = nResp)) + 
+  geom_bar(stat = 'identity') + 
+  geom_text(vjust = 1,color = 'white') + 
+  scale_y_continuous(labels = scales::percent) + 
+  labs(x = 'Semester',
+       y = 'Proportion Responding',
+       title = 'Midterm evaluations: Data Science with Prof Bisbee',
+       subtitle = 'Response rate and count')
+```
+
+---
+
+# How am I doing?
+
+```{r,echo=F,message=F,warning=F,fig.width=10,fig.height=7}
+toplotRaw <- toanal %>%
+  filter(grepl('Q(4|6)_',col)) %>%
+  count(label,response_fct,semester,agree,disagree) %>%
+  group_by(semester,label) %>%
+  mutate(share = prop.table(n),
+         agree = weighted.mean(agree,w = n),
+         disagree = weighted.mean(disagree,w = n)) %>%
+  ungroup() %>%
+  mutate(label = gsub('.* - ','',label)) %>%
+  filter(!grepl(" TAs ",label))
+
+pRaw <- toplotRaw %>%
+  ggplot(aes(y = reorder(label,agree),
+             x = share,
+             fill = response_fct,
+             text = paste0(label,'\n',
+                           response_fct,' - ',
+                           round(share*100),'%\n',
+                           'Strongly or somewhat agreeing -  ',round(agree*100),'%'))) + 
+  geom_bar(stat = 'identity') + 
+  # geom_text(data = toplotRaw %>%
+  #             select(label,agree,semester) %>%
+  #             distinct(),
+  #           aes(label = paste0(round(agree*100),'%'),y = reorder(label,agree)),
+  #           inherit.aes = F,x = 1,hjust = 1,color = 'white') + 
+  # geom_text(data = toplotRaw %>%
+  #             select(label,agree,semester) %>%
+  #             distinct() %>%
+  #             filter(semester == 'Spring 23',
+  #                    label == 'The instructor was consistently well-prepared for class.'),
+  #           aes(label = paste0('% agreeing: ',round(agree*100),'%'),y = reorder(label,agree)),
+  #           inherit.aes = F,x = 1,hjust = 1,color = 'white') + 
+  facet_grid(semester~.) + 
+  labs(x = '% responding',
+       y = NULL,
+       fill = 'Response',
+       title = 'Raw data') + 
+  theme(legend.position = 'none',
+        axis.text.y = element_text(size = 4)) + 
+  scale_x_continuous(labels = scales::percent)
+
+pRaw + 
+  geom_text(data = toplotRaw %>%
+              select(label,agree,semester) %>%
+              distinct(),
+            aes(label = paste0(round(agree*100),'%'),y = reorder(label,agree)),
+            inherit.aes = F,x = 1,hjust = 1,color = 'white') +
+  geom_text(data = toplotRaw %>%
+              select(label,agree,semester) %>%
+              distinct() %>%
+              filter(semester == 'Spring 23',
+                     label == 'The instructor was consistently well-prepared for class.'),
+            aes(label = paste0('% agreeing: ',round(agree*100),'%'),y = reorder(label,agree)),
+            inherit.aes = F,x = 1,hjust = 1,color = 'white') + 
+  theme(axis.text.y = element_text(size = 8),
+        legend.position = 'right')
+```
+
+---
+
+# How am I doing?
+
+```{r,echo=F,message=F,warning=F,fig.width=10,fig.height=7}
+require(plotly)
+ggplotly(pRaw,tooltip = 'text') %>% layout(hoverlabel = list(align = "right"))
+```
+
+---
+
+# How am I doing?
+
+```{r,echo=F,message=F,warning=F,fig.width=10,fig.height=7}
+toplotRaw %>%
+  filter(semester == 'ISP Summer') %>%
+  mutate(wdth = scales::rescale(n,to = c(.15,.95))) %>%
+  mutate(label = as.character(label)) %>%
+  mutate(label = stringr::str_wrap(label,width = 30)) %>%
+  ggplot(aes(x = response_fct,
+             y = label,
+             width = wdth,
+             height = wdth,
+             fill = share,
+             label = n)) + 
+  geom_tile() + 
+  geom_text(color = 'white') + 
+  theme_bw() + 
+  labs(x = 'Response',
+       y = NULL,
+       fill = '% responding',
+       title = 'ISP Summer 2024 only')
+```
+
+
+---
+
+# Digging deeper
+
+- Someone gave "strongly disagree" for every question
+
+```{r}
+toanal %>%
+  filter(semester == 'ISP Summer',
+         grepl('Q4_',col)) %>%
+  filter(response == 'Strongly Disagree') %>%
+  count(ResponseId)
+```
+
+---
+
+# Digging deeper
+
+- Someone gave "strongly disagree" for every question
+
+```{r}
+toanal %>%
+  filter(ResponseId == "R_4ReL8a12IsUneph") %>%
+  filter(grepl('Q(7|8|9)',col)) %>%
+  select(response)
+```
+
+---
+
+# Text analysis
+
+- Word clouds (I hate these things)
+
+```{r,echo=F,message=F,warning=F,fig.width=10,fig.height=7}
+require(tidytext)
+tokens <- toanal %>%
+  filter(grepl('Q(7|8|9)',col)) %>%
+  filter(semester == 'ISP Summer') %>%
+  unnest_tokens(output = word,input = response)
+
+data('stop_words',package = 'tidytext')
+
+tokens <- anti_join(tokens,stop_words,by = 'word') %>%
+  filter(!word %in% c('lot','bit','class','feel','code','friday'))
+
+dtm <- tokens %>%
+  count(ResponseId,word)
+
+require(wordcloud)
+
+
+set.seed(1234)
+wordcloud(words = dtm$word,
+          freq = dtm$n,
+          min.freq = 5,
+          max.words = 50)
+```
+
+---
+
+# Text analysis
+
+```{r,echo=F,message=F,warning=F,fig.width=10,fig.height=7}
+dtm %>%
+  group_by(word) %>%
+  summarise(n = sum(n)) %>%
+  arrange(desc(n)) %>%
+  slice(1:20) %>%
+  ggplot(aes(x = n,
+             y = reorder(word,n))) + 
+  geom_bar(stat = 'identity') + 
+  labs(x = 'Number of times word is used',
+       y = NULL,
+       title = 'Text analysis of open-ended questions',
+       subtitle = 'Top 20 used words')
+```
+
+---
+
+# Topic Modeling
+
+```{r,echo=F,message=F,warning=F,fig.width=10,fig.height=7}
+require(text2vec)
+toanal2 <- toanal %>%
+                   filter(semester == 'ISP Summer',
+                          grepl("Q(7|8|9)",col)) %>%
+  mutate(id = paste(id,col))
+tokens = tolower(toanal2$response)
+tokens = word_tokenizer(tokens)
+it = itoken(tokens, ids = toanal2$id, progressbar = FALSE)
+v = create_vocabulary(it,stopwords = stop_words$word)
+v = prune_vocabulary(v, term_count_min = 3, doc_proportion_max = 0.2)
+  
+vectorizer = vocab_vectorizer(v)
+dtm = create_dtm(it, vectorizer, type = "dgTMatrix")
+
+lda_model = LDA$new(n_topics = 10, doc_topic_prior = 0.1, topic_word_prior = 0.01)
+doc_topic_distr = 
+  lda_model$fit_transform(x = dtm, n_iter = 1000, 
+                          convergence_tol = 0.001, n_check_convergence = 25, 
+                          progressbar = FALSE)
+
+lda_model$plot()
+```
+
+---
+
+# Summary
+
+- Go **slower**
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(10)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(11)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(23)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(35)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(66)) %>%
+  pull(response)
+```
+
+```{r}
+toanal2 %>%
+  slice(c(10,11,23,35,41,44,46,47,52,58,63,64,66)) %>%
+  pull(response)
+  
+```
+
+
+  - Plan: reduce the pace, stay on code longer, explain better
+  
+  - Cost: unlikely to get to clustering content
+  
+2. Be **clearer**
+
+  - Plan: review grades with class?
+  
+3. 
+

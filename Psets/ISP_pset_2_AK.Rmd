@@ -1,0 +1,272 @@
+---
+title: "Problem Set 2"
+author: "[YOUR NAME]"
+date: "Due Date: 2024-07-09"
+output:
+  html_document: default
+  pdf_document: default
+subtitle: Data Wrangling
+institute: Seoul National University
+---
+
+```{r,include=F}
+knitr::opts_chunk$set(error=TRUE)
+```
+
+
+## Getting Set Up
+
+Open `RStudio` and create a new RMarkDown file (`.Rmd`) by going to `File -> New File -> R Markdown...`.
+Accept defaults and save this file as `[YOUR NAME]_ps2.Rmd` to your `code` folder.
+
+Copy and paste the contents of this `.Rmd` file into your `[YOUR NAME]_ps2.Rmd` file. Then change the `author: [Your Name]` on line 2 to your name.
+
+We will be using two different files. First is the `MI2020_ExitPoll.rds` data from the course [github page](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/data/MI2020_ExitPoll.rds). Second is the `nba_players_2018.Rds` data, which is also on the course [github page](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/data/nba_players_2018.Rds)
+
+All of the following questions should be answered in this `.Rmd` file. There are code chunks with incomplete code that need to be filled in. 
+
+This problem set is worth 10 total points, plus **two** extra credit questions, each worth **two** points. The point values for each question are indicated in brackets below. To receive full credit, you must have the correct code. In addition, some questions ask you to provide a written response in addition to the code.
+
+You are free to rely on whatever resources you need to complete this problem set, including lecture notes, lecture presentations, Google, your classmates...you name it. However, the final submission must be complete by you. There are no group assignments. To submit, email the knitted output to Eun Ji Kim (kej990804@snu.ac.kr) **as a PDF** by the start of class on Tuesday, July 9th. If you need help converting to a PDF, see [this tutorial](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_0_HELPER.pdf).
+
+**Good luck!**
+
+*Copy the link to ChatGPT you used here: _________________
+
+
+## Question 0
+*Require `tidyverse` and load the `MI2020_ExitPoll.Rds` data to an object called `MI_raw`. ALSO load a new package called `labelled`, which will allow us to read the labels for our variables. Remember, if you don't have this package yet, you need to use `install.packages("labelled")` in the `Console` window.*
+
+```{r}
+require(tidyverse)
+require(labelled)
+MI_raw <- read_rds("https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/MI2020_ExitPoll.rds")
+```
+
+
+## Question 1 [1 point]
+*How many units of observation are there in the raw dataset? How many variables are there?*
+
+> There are 1,231 observations in the raw dataset, and 63 variables. (You can see this by looking in the environment, or by just looking at the data.)
+
+*Now create a new object called `MI_clean` that contains only the following variables:*
+
+* AGE10
+* SEX
+* PARTYID
+* EDUC18
+* PRSMI20
+* QLT20
+* LGBT
+* BRNAGAIN
+* LATINOS
+* QRACEAI
+* WEIGHT
+
+```{r}
+MI_clean <- MI_raw %>%
+  select(AGE10,SEX,PARTYID,EDUC18,PRSMI20,QLT20,LGBT,BRNAGAIN,LATINOS,QRACEAI,WEIGHT)
+```
+
+*How many units of observation are there in the new dataset? How many variables are there?*
+
+> There are still 1,231 observations, but now we only have 11 variables.
+
+## Question 2 [1 point]
+*How many* **unit non-responses** *are there in the `PRSMI20` variable? What is the numeric code for unit non-response in this data? Remember, unit non-response refers to people who were asked a question but refused to answer.*
+
+```{r}
+MI_clean %>%
+  count(PRSMI20)
+```
+
+> There are 14 people who refused to tell us who they voted for. The numeric code for unit non-response is 8 in this data.
+
+## Question 3 [1 point]
+*Let's create a new variable called `preschoice` that converts `PRSMI20` to a simpler categorical variable that indicates whether the respondent voted for Trump, Biden, or neither. To do this, use `mutate()` and `ifelse()` to replace the numeric values of `PRSMI20` with their text labels. Remember to replace the unit non-response code with `NA`.*
+
+```{r}
+MI_clean <- MI_clean %>%
+  mutate(preschoice = ifelse(PRSMI20 == 1, # Test for Biden
+                             "Biden",
+                             ifelse(PRSMI20 == 2, # Test for Trump
+                                    "Trump",
+                                    ifelse(PRSMI20 == 8, # Test for unit non-response
+                                           NA,
+                                           "Neither"))))
+
+# Use this code to confirm you did it correctly
+MI_clean %>%
+  count(PRSMI20,preschoice)
+```
+
+*Now `count()` the number of respondents who reported voting for each candidate using the `preschoice` variable. How many respondents didn't vote for either Biden or Trump in 2020?*
+
+```{r}
+
+MI_clean %>%
+  count(preschoice)
+```
+
+> 35 respondents didn't vote for either Biden or Trump in 2020. This is a combination of those who voted for another candidate, did not vote at all, or didn't know who they would vote for at the time of the survey.
+
+## Question 4 [1 point]
+*Now do the same for the `SEX` variable and the `LGBT` variable. Name the the text version `Gender` for `SEX` and `Lgbt_clean` for `LGBT`. Remember to replace the unit non-response code with `NA`, and be aware that different variables use different codes!*
+
+```{r}
+# Follow these steps for each variable
+# 1. count() to see the unit non-response code (if it exists)
+MI_clean %>%
+  count(SEX)
+
+# 2. Create the cleaned variable
+MI_clean <- MI_clean %>%
+  mutate(Gender = ifelse(SEX == 1, # Test for value 1
+                         "Male",
+                         "Female"))
+
+# 1. count() to see the unit non-response code (if it exists)
+MI_clean %>%
+  count(LGBT)
+
+# 2. Create the cleaned variable
+MI_clean <- MI_clean %>%
+  mutate(Lgbt_clean = ifelse(LGBT == 1,
+                             'LGBT',
+                             ifelse(LGBT == 9,
+                                    NA,
+                                    'Not LGBT')))
+```
+
+## Question 5 [1 point]
+*What proportion of women supported Trump? What proportion of LGBTQ-identifying respondents supported Trump?*
+
+```{r}
+# Apply the following for each variable
+# Method 1: more lines of code
+MI_clean %>%
+  count(Gender,preschoice) %>%
+  group_by(Gender) %>%
+  mutate(totn = sum(n)) %>%
+  mutate(proportion = n / totn)
+
+# Method 2: prop.table()
+MI_clean %>%
+  count(Gender,preschoice) %>%
+  group_by(Gender) %>%
+  mutate(proportion = prop.table(n))
+
+# LGBT
+MI_clean %>%
+  count(Lgbt_clean,preschoice) %>%
+  group_by(Lgbt_clean) %>%
+  mutate(proportion = prop.table(n))
+```
+
+> 32.5% of women supported Trump. 30.4% of LGBT-identifying respondents supported Trump.
+
+## Extra Credit 1 [2 points]
+*Calculate the proportion of women who supported Trump by age-group to determine which age-group had the highest Trump support among women. You will need to clean the AGE10 variable before completing this problem, just like we did with the PRSMI20, SEX, and LGBT variables. Call the new variable "Age". HINT: to make your life easier (and not write a 10-level nested ifelse() function), try asking ChatGPT for help with this prompt: "I have a labelled variable in R that I want to convert to text. How can I do this?"*
+```{r}
+MI_clean %>%
+  count(AGE10)
+
+require(labelled)
+MI_clean <- MI_clean %>%
+  mutate(Age = ifelse(AGE10 == 99,
+                      NA,
+                      as.character(to_factor(AGE10))))
+
+MI_clean %>%
+  count(AGE10,Age)
+
+MI_clean %>%
+  count(Age,Gender,preschoice) %>%
+  group_by(Age,Gender) %>%
+  mutate(proportion = prop.table(n)) %>%
+  filter(Gender == 'Female',
+         preschoice == 'Trump')
+```
+
+> The age-group with the highest support for Trump among women is the 40 to 44 year old group, with 47% supporting Trump. (Interestingly, among women who refused to give their age, 57% supported Trump.)
+
+## Question 6 [1 point]
+*Now let's load a different dataset to practice univariate visualization. Open `nba_players_2018.Rds` from the github page and save it to a new object called `nba`. This dataset contains information on basketball players in the NBA from the 2018-2019 season. The codebook for it can be found in homework 3, which is also on [github](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_3.pdf).*
+
+```{r}
+nba <- read_rds("https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/nba_players_2018.Rds") # Insert link here
+```
+
+*We are interested in the relationship between the player's age (`agePlayer`) and the amount of points they score (`pts`). Please answer the following research question and provide a theory supporting your answer: "Do older NBA players score more points than younger players?"*
+
+> I think that older NBA players do not score as many points as younger players because they are older and therefore more likely to get tired. Younger players are probably in better physical condition than older players, allowing them to play longer and score more points.
+
+## Question 7 [2 points]
+*Based on your answer above, what is the outcome / dependent / $Y$ variable and what is the explanatory / independent / $X$ variable? Why?*
+
+> Based on my answer, the outcome variable is points and the explanatory variable is player age.
+
+*Create a univariate visualization of both the $X$ and $Y$ variables. Choose the best `geom_...()` based on the variable type, and make sure to label your plots!*
+
+```{r}
+# X variable
+nba %>%
+  ggplot(aes(x = agePlayer)) + 
+  geom_histogram(binwidth = 1) + 
+  labs(x = "Player Age",
+       y = "Number of players",
+       title = "Univariate visualization of player age in the 2018-2019 season")
+
+# Could also do with geom_bar(), since there are so few values
+nba %>%
+  ggplot(aes(x = agePlayer)) + 
+  geom_bar() + 
+  labs(x = "Player Age",
+       y = "Number of players",
+       title = "Univariate visualization of player age in the 2018-2019 season")
+
+
+# Y variable
+nba %>%
+  ggplot(aes(x = pts)) + 
+  geom_histogram() + 
+  labs(x = "Total points",
+       y = "Number of players",
+       title = "Univariate visualization of points scored in the 2018-2019 season")
+```
+
+## Question 8 [2 points]
+*Now analyze the data by creating a multivariate visualization that shows the relationship between age and points.*
+
+```{r}
+nba %>%
+  ggplot(aes(x = agePlayer,
+             y = pts)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm') + 
+  labs(x = "Player age",
+       y = "Total points",
+       title = "Relationship between player age and points scored")
+```
+
+*Based on your analysis, does the data support or reject your hypothesis from Question 6?*
+
+> It is difficult to say. The line of best fit is positive, suggesting that older players are able to score more points. However the relationship is very noisy, with many players located very far from the line of best fit.
+
+## Extra Credit 2 [2 points]
+*Let's look for evidence of a "curvelinear" relationship between player age and points scored. To do so, first calculate the average points scored by age. Then plot this relationship using a multivariate visualization. Add a line of best fit with `geom_smooth()` but DON'T use `method = "lm"`. What do you conclude? Why?*
+
+```{r}
+nba %>%
+  group_by(agePlayer) %>%
+  summarise(avg_points = mean(pts,na.rm=T)) %>%
+  ggplot(aes(x = agePlayer,
+             y = avg_points)) + 
+  geom_point() + 
+  geom_smooth() + 
+  labs(x = 'Player age',
+       y = 'Average points',
+       title = 'Relationship between player age and the average points they score')
+```
+
+> There is evidence of a "curvelinear" relationship between player age and points scored. The plot shows that the most points are scored by neither very young nor very old players. Instead, players in their late 20s or early 30s score the most points. This might mean there are two theories: first, the oldest players are slower and have less stamina than younger players, as per my original theory. Second, the youngest players might be inexperienced, making them also score less points.
