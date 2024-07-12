@@ -316,11 +316,11 @@ v = create_vocabulary(it,stopwords = stop_words$word)
 v = prune_vocabulary(v, term_count_min = 3, doc_proportion_max = 0.2)
   
 vectorizer = vocab_vectorizer(v)
-dtm = create_dtm(it, vectorizer, type = "dgTMatrix")
+dtm2 = create_dtm(it, vectorizer, type = "dgTMatrix")
 
 lda_model = LDA$new(n_topics = 10, doc_topic_prior = 0.1, topic_word_prior = 0.01)
 doc_topic_distr = 
-  lda_model$fit_transform(x = dtm, n_iter = 1000, 
+  lda_model$fit_transform(x = dtm2, n_iter = 1000, 
                           convergence_tol = 0.001, n_check_convergence = 25, 
                           progressbar = FALSE)
 
@@ -331,7 +331,139 @@ lda_model$plot()
 
 # Summary
 
-- Go **slower**
+- Overall, what did the open-ended questions reveal?
+
+```{r,echo=F,message=F,warning=F,fig.width=10,fig.height=6}
+tokens <- toanal %>%
+  filter(grepl('Q(7|8|9)',col)) %>%
+  filter(semester == 'ISP Summer') %>%
+  unnest_tokens(output = word,input = response)
+
+data('stop_words',package = 'tidytext')
+
+tokens <- anti_join(tokens,stop_words,by = 'word') %>%
+  filter(!word %in% c('lot','bit','class','feel','code','friday'))
+
+dtm <- tokens %>%
+  count(ResponseId,word)
+
+dtm %>%
+  # filter(ResponseId == 'R_4hlIYsNIVSCtVGz')
+  mutate(difficulty = grepl('hard|difficult|challeng',tolower(word)),
+         speed = grepl('fast|slow|rush|time|too many',tolower(word)),
+         easy = grepl("easy|good|expanding|delve",tolower(word))) %>%
+  group_by(ResponseId) %>%
+  summarise(difficult = mean(difficulty*n),
+            speed = mean(speed*n),
+            easy = mean(easy*n)) %>%
+  # filter(easy == 1)
+  gather(measure,value,-ResponseId) %>%
+  ggplot(aes(x = value,
+             y = reorder(measure,value))) + 
+  geom_boxplot(outliers = T) + 
+  labs(x = 'Average words',
+       y = NULL,
+       title = 'Distribution of evaluation words',
+       subtitle = '3 Summary Dimensions')
+```
+
+---
+
+# Summary: **DIFFICULT**
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(7)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(8)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(9)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(28)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(31)) %>%
+  pull(response)
+```
+
+---
+
+# Summary: **DIFFICULT**
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(34)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(55)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(56)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(61)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(62)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(64)) %>%
+  pull(response)
+```
+
+---
+
+# Summary: **SPEED**
 
 ```{r,echo=F}
 toanal2 %>%
@@ -351,7 +483,7 @@ toanal2 %>%
 
 ```{r,echo=F}
 toanal2 %>%
-  slice(c(23)) %>%
+  slice(c(35)) %>%
   pull(response)
 ```
 
@@ -359,7 +491,57 @@ toanal2 %>%
 
 ```{r,echo=F}
 toanal2 %>%
-  slice(c(35)) %>%
+  slice(c(44)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(46)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(58)) %>%
+  pull(response)
+```
+
+---
+
+# Summary: **SPEED**
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(63)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(41)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(36)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(45)) %>%
   pull(response)
 ```
 
@@ -371,21 +553,96 @@ toanal2 %>%
   pull(response)
 ```
 
-```{r}
-toanal2 %>%
-  slice(c(10,11,23,35,41,44,46,47,52,58,63,64,66)) %>%
-  pull(response)
+---
+
+# Response
+
+- Plan: reduce the pace, stay on code longer, explain better
   
+- Cost: might not cover everything in the syllabus
+
+---
+
+# Summary: **EASY**
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(18)) %>%
+  pull(response)
 ```
 
+--
 
-  - Plan: reduce the pace, stay on code longer, explain better
-  
-  - Cost: unlikely to get to clustering content
-  
-2. Be **clearer**
+```{r,echo=F}
+toanal2 %>%
+  slice(c(15)) %>%
+  pull(response)
+```
 
-  - Plan: review grades with class?
-  
-3. 
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(50)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(1)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(51)) %>%
+  pull(response)
+```
+
+--
+
+```{r,echo=F}
+toanal2 %>%
+  slice(c(2)) %>%
+  pull(response)
+```
+
+---
+
+# Summary: **EASY**
+
+- Plan: ???
+
+--
+
+- The teacher's paradox! Aim for the center to minimize dissatisfaction!
+
+- 73% of the respondents talked about the speed, 68% talked about the difficulty, 18% talked about the ease
+
+```{r,echo=F,message=F}
+toanal3 <- toanal2 %>%
+  group_by(ResponseId) %>%
+  summarise(response = paste(response,collapse = ' ')) %>%
+  ungroup() %>%
+  mutate(difficulty = grepl('hard|difficult|challeng',tolower(response)),
+         speed = grepl('fast|slow|rush|time|too many',tolower(response)),
+         easy = grepl("easy|totally good|expanding|delve",tolower(response)))
+
+toanal3 %>%
+  summarise(difficulty = mean(difficulty),
+            speed = mean(speed),
+            easy = mean(easy)) %>%
+  gather(dimension,proportion) %>%
+  arrange(desc(proportion)) %>%
+  left_join(toanal3 %>%
+  summarise_at(vars(-ResponseId,-response),sum) %>%
+  gather(dimension,nResp))
+```
+
 
