@@ -1,0 +1,122 @@
+---
+title: "Lecture 7 Notes"
+output: html_document
+date: "2024-07-15"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Regression
+
+- Starting with old school data
+
+```{r}
+require(tidyverse)
+
+debt <- read_rds("https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/sc_debt.Rds")
+```
+
+# Univariate VIsualization
+
+```{r}
+# Looking at X variable first
+debt %>%
+  ggplot(aes(x = sat_avg)) + 
+  geom_histogram()
+
+# Look at Y variable second
+debt %>%
+  ggplot(aes(x = md_earn_wne_p6)) + 
+  geom_histogram()
+```
+
+# Multivariate Visualization
+
+```{r}
+debt %>%
+  ggplot(aes(x = sat_avg,
+             y = md_earn_wne_p6)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm') + 
+  xlim(c(0,1600)) + 
+  ylim(c(-13000,130000))
+
+```
+
+# Introducing lm() function
+
+- Two inputs:
+
+1. `formula`
+
+2. `data`
+
+```{r}
+model_1 <- lm(md_earn_wne_p6 ~ sat_avg,debt)
+
+summary(model_1)
+```
+
+# Better summary of lm() function results
+
+- use `broom` package
+
+```{r}
+require(broom)
+tidy(model_1)
+```
+
+# Introducing Movies!
+
+```{r}
+mv <- read_rds("https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/mv.Rds")
+```
+
+# # of observations / unit of analysis / # of variables
+
+```{r}
+summary(mv)
+```
+
+# Univariate Visualization
+
+```{r}
+# Y variable
+mv %>%
+  ggplot(aes(x = gross)) + 
+  geom_histogram()
+
+# X Variable
+mv %>%
+  ggplot(aes(x = budget)) + 
+  geom_histogram()
+
+```
+
+# Using log() to fix skew
+
+```{r}
+mv <- mv %>%
+  mutate(gross_log = log(gross),
+         budget_log = log(budget))
+
+# Look at univariate again
+mv %>%
+  ggplot(aes(x = gross_log)) + 
+  geom_histogram()
+
+mv %>%
+  ggplot(aes(x = budget_log)) + 
+  geom_histogram()
+```
+
+# Multivariate
+
+```{r}
+
+```
+
+
+
