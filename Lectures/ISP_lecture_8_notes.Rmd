@@ -126,5 +126,148 @@ mv_analysis %>%
   geom_smooth()
 ```
 
+#RMSE
+
+- How bad is our model on average?
+
+```{r}
+# Method 1: Step-by-step
+# Error: already calculated above
+mv_analysis %>%
+  select(title,error)
+
+# Squared Error (SE)
+mv_analysis <- mv_analysis %>%
+  mutate(se = error^2)
+
+# Mean Squared Error (MSE)
+rmse <- mv_analysis %>%
+  summarise(mse = mean(se))
+
+# Root Mean Squared Error (RMSE)
+rmse <- rmse %>%
+  mutate(rmse = sqrt(mse))
+
+# Messy code
+mv_analysis %>%
+  summarise(rmse = sqrt(mean((error)^2)))
+```
+
+# Cross validation
+
+- Very similar to bootstrapping
+
+```{r, message=F}
+set.seed(123)
+cv_result <- NULL
+for(i in 1:100) {
+  # Step 1: Divide data
+  train <- mv_analysis %>%
+    sample_n(size = round(nrow(mv_analysis)*.5),
+             replace = F)
+  
+  test <- mv_analysis %>%
+    anti_join(train)
+  
+  # Step 2: Train the model
+  mTmp <- lm(formula = gross_log ~ budget_log,
+             data = train)
+  
+  # Step 3: Evaluate the model
+  test <- test %>%
+    mutate(YHat = predict(mTmp,newdata = test)) %>%
+    mutate(error = gross_log - YHat)
+  
+  # RMSE
+  answer <- test %>%
+    summarise(rmse = sqrt(mean((error^2)))) %>%
+    mutate(cvInd = i)
+  
+  # Save result
+  cv_result <- cv_result %>%
+    bind_rows(answer)
+}
+
+# Summary 1: just calculate the mean
+mean(cv_result$rmse)
+
+# Summary 2: Univariate visualization
+cv_result %>%
+  ggplot(aes(x = rmse)) + 
+  geom_density()
+```
+
+# New RQ: What is the relationship between a movie's gross and it's IMDB score?
+
+- Theory (boring Teacher's theory): The score informs consumers which movies are good, and they then go out to watch those movies, increasing the gross. 
+
+- Univariate visualization of `score`
+
+```{r}
+
+```
+
+- Multivariate visualization of `score` and `gross_log`.
+
+```{r}
+
+```
+
+- Regression result
+
+```{r}
+m2 <- lm(gross_log ~ score,
+         data = mv_analysis)
+
+tidy(m2)
+
+(exp(0.279)-1)*100
+```
+
+# Cross validation for RMSE
+
+
+```{r, message=F}
+set.seed(123)
+cv_result <- NULL
+for(i in 1:100) {
+  # Step 1: Divide data
+  train <- mv_analysis %>%
+    sample_n(size = round(nrow(mv_analysis)*.5),
+             replace = F)
+  
+  test <- mv_analysis %>%
+    anti_join(train)
+  
+  # Step 2: Train the model
+  mTmp_score <- lm(formula = gross_log ~ score,
+             data = train)
+  
+  mTmp_budget <- lm(formula = gross_log ~ budget_log,
+             data = train)
+  
+  # Step 3: Evaluate the model
+  test <- test %>%
+    mutate(YHat_score = predict(mTmp_score,newdata = test),
+           YHat_budget = predict(mTmp_budget,newdata = test)) %>%
+    mutate(error_score = gross_log - YHat_score,
+           error_budget = gross_log - YHat_budget)
+  
+  # RMSE
+  answer <- test %>%
+    summarise(rmse_score = sqrt(mean(error_score^2)),
+              rmse_budget = sqrt(mean((error_budget^2)))) %>%
+    mutate(cvInd = i)
+  
+  # Save result
+  cv_result <- cv_result %>%
+    bind_rows(answer)
+}
+
+# Summary 1: just calculate the mean
+mean(cv_result$rmse_score)
+mean(cv_result$rmse_budget)
+
+```
 
 
