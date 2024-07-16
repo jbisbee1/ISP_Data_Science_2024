@@ -34,7 +34,7 @@ output:
 ```{r,include=F}
 set.seed(123)
 options(width=60)
-knitr::opts_chunk$set(fig.align='center',fig.width=9,fig.height=5)
+knitr::opts_chunk$set(fig.align='center',fig.width=9,fig.height=5,dev = 'svg')
 def.chunk.hook  <- knitr::knit_hooks$get("chunk")
 knitr::knit_hooks$set(chunk = function(x, options) {
   x <- def.chunk.hook(x, options)
@@ -823,9 +823,9 @@ tidy(lm(accuracy ~ mental_state,fn))
 
 --
 
-  - Decimal, then 4 zeros, then the number
+  - Decimal, then 3 zeros, then the number
   
-  - `0.0000747`
+  - `0.000747`
   
 --
 
@@ -833,7 +833,21 @@ tidy(lm(accuracy ~ mental_state,fn))
 
 --
 
-  - `0.0139`
+  - `0.139`
+
+--
+
+- Rule: take the number, and move the decimal $n$ places to the left, where $n$ is the negative number following the `e`
+
+--
+
+- What about `7.47e+4`
+
+--
+
+- Rule: take the number, and move the decimal $n$ places to the **right**, where $n$ is the positive number following the `e`
+
+  - 74,700
 
 ---
 

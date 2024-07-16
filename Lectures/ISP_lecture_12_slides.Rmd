@@ -1,0 +1,983 @@
+---
+title: "Text, Tweets, and Sentiment"
+subtitle: "Part 3"
+author: "Prof. Bisbee"
+institute: "Seoul National University"
+date: "Slides Updated: `r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    # self_contained: true
+    chakra: libs/remark-latest.min.js
+    lib_dir: libs
+    css:
+      - default
+      - css/lexis.css
+      - css/lexis-fonts.css
+    #seal: false
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      #ratio: "16:9"
+
+---
+
+```{r,include=F}
+options(width=60)
+knitr::opts_chunk$set(fig.align='center',fig.width=9,fig.height=5,dev = 'svg')
+```
+
+---
+
+# Returning to Trump
+
+```{r,message=F,warning=F}
+require(tidyverse)
+tweet_words <- read_rds(file="https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/Trump_tweet_words.Rds")
+tweet_words <- tweet_words %>% mutate(PostPresident = Tweeting.date > as.Date('2016-11-06'))
+```
+
+---
+
+# Log-Odds
+
+- **Odds**: Probability a word is used pre/post presidency
+  
+- **Log**: Useful for removing skew in data!
+  
+--
+
+- Interactive code time!
+
+---
+
+# Odds Step 1
+
+```{r}
+(odds1 <- tweet_words %>%
+  count(word, PostPresident) %>%
+  filter(sum(n) >= 5) %>%
+  spread(PostPresident, n, fill = 0) %>%
+  ungroup() %>%
+  mutate(totFALSE = sum(`FALSE`),
+         totTRUE = sum(`TRUE`)))
+```
+
+---
+
+# Odds Step 2
+
+```{r}
+(odds2 <- odds1 %>%
+  mutate(propFALSE = (`FALSE` + 1) / (totFALSE + 1),
+         propTRUE = (`TRUE` + 1) / (totTRUE + 1)))
+```
+
+---
+
+# Odds Step 3
+
+```{r}
+(odds3 <- odds2 %>%
+  mutate(odds = propTRUE / propFALSE))
+```
+
+---
+
+# Why log?
+
+```{r,message=F}
+odds3 %>%
+  ggplot(aes(x = odds)) + 
+  geom_histogram()
+```
+
+---
+
+# Why log?
+
+```{r}
+odds3 %>%
+  ggplot(aes(x = odds)) + 
+  geom_histogram(bins = 15) + 
+  scale_x_log10()
+```
+
+---
+
+# Odds Step 4
+
+```{r}
+(prepost_logodds <- odds3 %>%
+  mutate(logodds = log(odds)))
+```
+
+---
+
+# Effect of becoming president
+
+```{r, warning=FALSE}
+p <- prepost_logodds %>%
+  group_by(logodds > 0) %>%
+  top_n(15, abs(logodds)) %>%
+  ungroup() %>%
+  mutate(word = reorder(word, logodds)) %>%
+  ggplot(aes(word, logodds, fill = logodds < 0)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  ylab("Post-President/Pre-President log ratio") +
+  scale_fill_manual(name = "", labels = c("President", "Pre-President"),
+                    values = c("red", "lightblue"))
+```
+
+---
+
+# Effect of becoming president
+
+```{r}
+p
+```
+
+---
+
+# Meaning
+
+- Thus far, everything is **topic**-related
+
+--
+
+  - How often he talks about things
+  
+--
+
+- But what does he **mean** when he talks about Mueller?
+
+--
+
+  - We can probably guess
+  
+--
+
+- But we want a more systematic method
+
+--
+
+  - **Sentiment**: the *feeling* behind words
+  
+---
+
+# Meaning
+
+- **Sentiment** analysis is based on **dictionaries**
+
+--
+
+  - Just like **stop words** from last week!
+  
+--
+
+  - Prepared lists of words, but tagged according to **emotion**
+  
+--
+
+- Good dictionary included in `tidytext` package
+
+```{r,warning = F}
+require(tidytext) # Might need to install.packages('textdata')
+# nrc <- get_sentiments("nrc")
+# If this doesn't work on your computer, just load it with read_rds()
+nrc <- read_rds('https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/nrc.Rds')
+```
+
+---
+
+# Meaning
+
+```{r}
+nrc
+```
+
+---
+
+# Sentiment by Pre/Post Presidency
+
+- Measure sentiment by proportion of words
+
+--
+
+- Divide by pre/post presidency
+
+--
+
+```{r}
+word_freq <- tweet_words %>%
+  group_by(PostPresident) %>%
+  count(word) %>%
+  filter(sum(n) >= 5) %>%
+   mutate(prop = prop.table(n)) # Faster way of calculating proportions!
+```
+
+---
+
+# Sentiment by Pre/Post Presidency
+
+- Attaching sentiment from `nrc`
+
+--
+
+  - `inner_join()`: only keeps words that appear in `nrc`
+  
+```{r}
+word_freq_sentiment <- word_freq %>%
+    inner_join(nrc, by = "word") 
+```
+
+---
+
+# Sentiment overall
+
+```{r}
+p <- word_freq_sentiment %>%
+  group_by(sentiment) %>%
+  top_n(10, n) %>%
+  ungroup() %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(y = word, x = n)) +
+  facet_wrap(~ sentiment, scales = "free", nrow = 3) + 
+  geom_bar(stat = "identity")
+```
+
+---
+
+# Sentiment Overall
+
+```{r}
+p
+```
+
+---
+
+# Sentiment overall
+
+- Could also just calculate positive sentiments - negative sentiments
+
+--
+
+  - Want to do this at the tweet level
+  
+--
+
+```{r,warning=F,message=F}
+tweet_sentiment <- tweet_words %>%
+    inner_join(nrc, by = "word") 
+  
+tweet_sentiment_summary <- tweet_sentiment %>%
+  group_by(PostPresident, sentiment) %>%
+  count(document,sentiment) %>%
+  pivot_wider(names_from = sentiment, 
+              values_from = n, 
+              values_fill = 0) %>% # same as spread()!
+  mutate(sentiment = positive - negative)
+```
+
+---
+
+# Sentiment overall
+
+```{r}
+tweet_sentiment_summary
+```
+
+---
+
+# Sentiment by presidency
+
+- Calculate total number of tweets by sentiment
+
+--
+
+```{r}
+tweet_sentiment_summary  %>%
+  group_by(PostPresident) %>%
+  mutate(ntweet = 1) %>%
+  summarize(across(-document, sum)) 
+```
+
+---
+
+# Sentiment by presidency
+
+- Univariate distributions!
+
+--
+
+```{r,warning = FALSE}
+p <- tweet_sentiment_summary %>%
+  ggplot(aes(x = sentiment, y = PostPresident)) + 
+  geom_boxplot() +
+  labs(y= "Trump is president", x = "Sentiment Score: Positive - Negative")
+```
+
+
+
+---
+
+# Sentiment by presidency
+
+- Univariate distributions!
+
+```{r,message=F,warning = FALSE}
+p
+```
+
+---
+
+# Sentiment by hour
+
+- Univariate distributions
+
+  - Comparing sentiment by hour
+  
+--
+
+```{r,message=F}
+p <- tweet_sentiment %>%
+  group_by(PostPresident,Tweeting.hour,sentiment) %>%
+  count(document,sentiment) %>%
+  pivot_wider(names_from = sentiment, values_from = n, values_fill = 0) %>% 
+  mutate(sentiment = positive - negative) %>%
+  summarize(AvgSentiment = mean(sentiment)) %>%
+  ggplot(aes(y = AvgSentiment, x= Tweeting.hour, color=PostPresident)) + 
+  geom_point(size = 4) +
+  geom_hline(yintercept = 0,linetype = 'dashed') + 
+  labs(x = "Tweeting Hour (EST)", y = "Average Tweet Sentiment: Positive - Negative", color = "Is President?")
+```
+
+---
+
+# Sentiment by hour
+
+- Comparing sentiment by hour
+
+```{r}
+p
+```
+
+
+---
+
+# Understanding Trump
+
+- When Trump is coded as "positive" or "negative", what is he saying?
+
+--
+
+- Look at log-odds ratio words, matched to sentiment!
+
+```{r}
+p <- prepost_logodds %>%
+  inner_join(nrc, by = "word") %>%
+  filter(!sentiment %in% c("positive", "negative")) %>%
+  mutate(sentiment = reorder(sentiment, -logodds),
+         word = reorder(word, -logodds)) %>%
+  group_by(sentiment) %>%
+  top_n(10, abs(logodds)) %>%
+  ungroup() %>%
+  ggplot(aes(y = word, x = logodds, fill = logodds < 0)) +
+  facet_wrap(~ sentiment, scales = "free", nrow = 2) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(x = "", y = "Post / Pre log ratio") +
+  scale_fill_manual(name = "", labels = c("Post", "Pre"),
+                    values = c("red", "lightblue")) + 
+  theme(legend.position = 'bottom')
+```
+
+---
+
+# Understanding Trump
+
+```{r}
+p
+```
+
+---
+
+# Text as predictors
+
+- Let's say we didn't know when each tweet was written
+
+--
+
+- Could we predict whether it was written during his presidency or not?
+
+--
+
+  - Logit model using **text** as predictors
+  
+  
+---
+
+# Text as Data
+
+- Predict tweets by average of words' log-odds!
+
+```{r,message=F}
+toanal <- tweet_words %>%
+  select(document,word,PostPresident) %>%
+  left_join(prepost_logodds %>% select(word,logodds)) %>% # Link data with log-odds
+  group_by(document,PostPresident) %>%
+  summarise(logodds = mean(logodds)) %>% # Calculate average log-odds by document
+  ungroup()
+
+m <- glm(PostPresident ~ logodds,toanal,family = binomial) # logit regression
+```
+
+---
+
+# Text as Data
+
+- Evaluate the performance
+
+```{r,message=F,warning=F}
+require(tidymodels)
+forAUC <- toanal %>% # Evaluate model performance
+  mutate(preds = predict(m,type = 'response'),
+         truth = factor(PostPresident,levels = c('TRUE','FALSE')))
+
+roc_auc(forAUC,'truth','preds')
+
+p <- roc_curve(forAUC,'truth','preds') %>%
+  ggplot(aes(x = 1-specificity,y = sensitivity)) + 
+  geom_line() + 
+  geom_abline(intercept = 0,slope = 1,linetype = 'dashed')
+```
+
+---
+
+# Evaluate performance
+
+```{r}
+p
+```
+
+---
+
+# Evaluate on some sample tweets
+
+```{r}
+raw_tweets <- read_rds('https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/Trumptweets.Rds')
+set.seed(20)
+toCheck <- raw_tweets %>% slice(sample(1:nrow(.),size = 10))
+
+toCheck %>%
+  select(content)
+```
+
+---
+
+# Evaluate on some sample tweets
+
+```{r}
+toTest <- toCheck %>% left_join(toanal,by = c('id' = 'document')) # Merge the raw text with the log-odds
+
+toTest %>%
+  mutate(preds = predict(m,newdata = toTest,type = 'response')) %>%
+  select(content,PostPresident,preds) %>%
+  mutate(pred_binary = preds > .5) %>%
+  filter(PostPresident != pred_binary)
+# We only make 3 mistakes!
+```
+
+
+---
+
+# Can we do better if we add sentiment?
+
+```{r}
+toanal <- toanal %>%
+  left_join(tweet_sentiment_summary) %>%
+  drop_na()
+
+m1 <- glm(PostPresident ~ logodds,toanal,family = binomial)
+m2 <- glm(PostPresident ~ logodds + sentiment,toanal,family = binomial)
+m3 <- glm(PostPresident ~ logodds + anger + anticipation + disgust + fear + joy + sadness + surprise + trust,toanal,family = binomial)
+
+forAUC <- toanal %>%
+  mutate(preds1 = predict(m1,type = 'response'),
+         preds2 = predict(m2,type = 'response'),
+         preds3 = predict(m3,type = 'response'),
+         truth = factor(PostPresident,levels = c('TRUE','FALSE')))
+```
+
+---
+
+# Can we do better if we add sentiment?
+
+```{r}
+roc_auc(forAUC,'truth','preds1') %>% mutate(model = 'logodds') %>%
+  bind_rows(roc_auc(forAUC,'truth','preds2') %>% mutate(model = 'logodds & net sentiment')) %>%
+  bind_rows(roc_auc(forAUC,'truth','preds3') %>% mutate(model = 'logodds & detailed sentiment'))
+```
+
+--
+
+- Not really
+
+---
+
+# Conclusion
+
+- Sentiment can...
+
+--
+
+  - ...help us describe the data (i.e., infer what someone meant)
+  
+  - ...help us predict the data (RQ: do positive tweets get more likes?)
+
+---
+
+# BREAK
+
+---
+
+# Final fun things: maps!
+
+- Install `maps`
+
+```{r,message = F,warning = F}
+require(tidyverse)
+require(maps)
+require(mapproj)
+
+# Load dataset included in maps package
+states48 <- map_data('state')
+
+states48 %>%
+  as_tibble()
+```
+
+---
+
+# Maps
+
+- `maps` data are prepared to run with `ggplot()`
+
+--
+
+  - Specifically, want to use `geom_polygon()`
+  
+--
+
+```{r}
+p <- states48 %>%
+  ggplot() + 
+  geom_polygon(aes(x = long,y = lat,group = group),
+               color = 'black',
+               fill = 'lightblue')
+```
+
+---
+
+# Maps
+
+```{r}
+p
+```
+
+---
+
+# Maps
+
+- Can quickly improve with pre-made `theme()`s and `coord()`s
+
+--
+
+```{r}
+p + 
+  theme_void() + 
+  coord_map('albers',lat0 = 30,lat1 = 40)
+```
+
+---
+
+# Maps
+
+- Can zoom in with `filter()`
+
+--
+
+```{r}
+ny <- states48 %>%
+  filter(region == 'new york')
+
+pNY <- ny %>%
+  ggplot() + 
+  geom_polygon(aes(x = long,y = lat,group = group),
+               color = 'black',
+               fill = 'grey85') + 
+  theme_void()
+```
+
+---
+
+# Maps
+
+```{r}
+pNY
+```
+
+---
+
+# Maps
+
+```{r}
+pNY + 
+  coord_map('albers',lat0 = 30,lat1 = 40)
+```
+
+---
+
+# Maps
+
+- Can also get counties prepared!
+
+```{r}
+counties <- map_data('county')
+
+pCty <- counties %>%
+  ggplot() + 
+  geom_polygon(aes(x = long,y = lat,group = group),
+               color = 'black',
+               fill = 'grey90') + 
+  theme_void() + 
+  coord_map('albers',lat0 = 30,lat1 = 40)
+```
+
+---
+
+# Maps
+
+```{r}
+pCty
+```
+
+---
+
+# Maps
+
+```{r}
+pNYCty <- counties %>%
+  filter(region == 'new york') %>%
+  ggplot() + 
+  geom_polygon(aes(x = long,y = lat,group = group),
+               color = 'black',
+               fill = 'grey90') + 
+  theme_void() + 
+  coord_map('albers',lat0 = 30,lat1 = 40)
+```
+
+---
+
+# Maps
+
+```{r}
+pNYCty
+```
+
+---
+
+# Maps
+
+- Want to visualize data!
+
+--
+
+- Put the `fill` inside the `aes`
+
+--
+
+- But we need data first
+
+--
+
+```{r}
+JBStates <- c('new york','california','vermont','massachusetts','district of columbia','tennessee','connecticut')
+
+states48 <- states48 %>%
+  mutate(jbLived = ifelse(region %in% JBStates,'Lived','Never lived'))
+```
+
+---
+
+# Maps
+
+```{r}
+p <- states48 %>%
+  ggplot() + 
+  geom_polygon(aes(x = long,y = lat,group = group,fill = jbLived),
+               color = 'black',alpha = .6) + 
+  theme_void() + 
+  coord_map('albers',lat0 = 30,lat1 = 40)
+```
+
+---
+
+# Maps
+
+```{r}
+p + 
+  scale_fill_manual(name = '',values = c('Lived' = 'darkgreen','Never lived' = 'grey95')) + 
+  labs(title = "Places I've Lived in the U.S.")
+```
+
+---
+
+# Maps
+
+- Also have world maps!
+
+```{r}
+JBCountries <- c('USA','South Korea','France','UK',
+                 'Germany','Switzerland','Greece',
+                 'Dominican Republic','Saint Lucia',
+                 'China','Thailand','Cambodia','Japan',
+                 'Guatemala','Aruba','Canada','Belize','Mexico')
+world <- map_data('world')
+
+world <- world %>%
+  mutate(jbVisit = ifelse(region %in% JBCountries,'Visited','Never been'))
+
+p <- world %>%
+  ggplot() + 
+  geom_polygon(aes(x = long,y = lat,group = group,fill = jbVisit),
+               color = 'black',alpha = .6) + 
+  theme_void()
+```
+
+---
+
+# Maps
+
+```{r}
+p + 
+  scale_fill_manual(name = '',values = c('Visited' = 'darkgreen','Never been' = 'grey95')) + 
+  labs(title = "Places I've Visited")
+```
+
+---
+
+# Maps
+
+- More interesting data?
+
+--
+
+```{r}
+PollDat <- readRDS('../data/PresStatePolls04to20.Rds') %>%
+  as_tibble() %>%
+  rename(region = state.name)
+
+PollDat %>% head()
+```
+
+---
+
+# Maps
+
+- Collapse to state-by-year
+
+--
+
+```{r}
+PollDat <- PollDat %>%
+  group_by(year,region) %>%
+  summarise(DemPct = mean(dem.poll,na.rm=T),
+            RepPct = mean(rep.poll,na.rm=T),
+            DemVote = first(dem.vote),
+            RepVote = first(rep.vote)) %>%
+  ungroup()
+```
+
+---
+
+# Maps
+
+- Merge with map data
+
+--
+
+```{r}
+toplot <- states48 %>%
+  left_join(PollDat %>%
+              filter(year == 2020))
+
+p <- toplot %>%
+  ggplot() + 
+  geom_polygon(aes(x = long,y = lat,group = group,fill = DemPct),
+               color = 'black') + 
+  theme_void() + 
+  coord_map('albers',lat0 = 30,lat1 = 40)
+```
+
+---
+
+# Maps
+
+```{r}
+p
+```
+
+---
+
+# Maps
+
+- Let's adjust with `scale_fill_continuous()`
+
+```{r}
+p + 
+  scale_fill_continuous(name = 'Biden %',low = 'red',high = 'blue')
+```
+
+---
+
+# Maps
+
+- Could also `cut` to create bins
+
+```{r}
+p + 
+  scale_fill_stepsn(colors = c('darkred','red','tomato','grey80','skyblue','blue','darkblue'),
+                    breaks = c(30,35,40,49,51,60,65,70))
+```
+
+---
+
+# Maps
+
+- Different geographies & different data
+
+```{r}
+countycovid <- readRDS('../data/countycovid.Rds') # Already prepared!
+
+p <- countycovid %>%
+  ggplot() + 
+  geom_polygon(aes(x = long,y = lat,group = group,fill = deaths),
+               color = 'grey90') + 
+  theme_void() + 
+  coord_map('albers',lat0 = 30,lat1 = 40)
+```
+
+---
+
+# Maps
+
+```{r}
+p + 
+  scale_fill_continuous(name = 'Deaths',low = 'white',high = 'red')
+```
+
+---
+
+# Maps
+
+- Raw deaths are a bad measure...why?
+
+--
+
+- Want to normalize by population!
+
+```{r}
+p <- countycovid %>%
+  ggplot() + 
+  geom_polygon(aes(x = long,y = lat,group = group,
+                   fill = deaths*100000/population)) + 
+  theme_void() + 
+  coord_map('albers',lat0 = 30,lat1 = 40)
+```
+
+---
+
+# Maps
+
+```{r}
+p + 
+  scale_fill_continuous(name = 'Deaths (per 100K)',
+                        low = 'white',high = 'red')
+```
+
+---
+
+# Maps
+
+- What about more precise things?
+
+--
+
+- I.e., where I've lived by county
+
+```{r}
+jbCounties <- c('norfolk:massachusetts','washington:vermont',
+                'manhattan:new york','san francisco:california',
+                'davidson:tennessee','hartford:connecticut',
+                'washington:district of columbia')
+
+counties <- counties %>%
+  mutate(combReg = paste0(subregion,":",region)) %>%
+  mutate(jbLived = ifelse(combReg %in% jbCounties,'Lived',
+                          'Never lived'))
+
+p <- counties %>%
+  ggplot() + 
+  geom_polygon(aes(x = long,y = lat,group = group,
+                   fill = jbLived)) + 
+  theme_void() + 
+  coord_map('albers',lat0 = 30,lat1 = 40)
+```
+
+---
+
+# Maps
+
+```{r}
+p
+```
+
+---
+
+# Maps
+
+- Can add points instead!
+
+--
+
+```{r,message = F,warning = F}
+jbLivedDF <- data.frame(combReg = jbCounties,
+                        years = c(18,18,7,1,.4,3,4))
+
+counties <- counties %>% left_join(jbLivedDF)
+
+p <- counties %>%
+  ggplot() + 
+  geom_polygon(aes(x = long,y = lat,group = group),
+               fill = 'grey95',color = 'grey70') + 
+  geom_point(data = counties %>%
+               drop_na(years) %>%
+               group_by(group,years) %>%
+               summarise(long = mean(long),lat = mean(lat)),
+             aes(x = long,y = lat,size = years),shape = 21,color = 'red') + 
+  theme_void() + 
+  scale_size_continuous(range = c(2,10),breaks = c(1,5,10)) + 
+  coord_map('albers',lat0 = 30,lat1 = 40)
+```
+
+---
+
+# Maps
+
+```{r}
+p
+```
+
+

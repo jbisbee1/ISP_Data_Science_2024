@@ -26,7 +26,7 @@ class: center, middle, inverse, title-slide
 ### Seoul National University
 ]
 .date[
-### Slides Updated: 2024-07-11
+### Slides Updated: 2024-07-16
 ]
 
 ---
@@ -110,7 +110,7 @@ mv %&gt;%
   geom_line()
 ```
 
-&lt;img src="ISP_lecture_8_slides_files/figure-html/unnamed-chunk-5-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="ISP_lecture_8_slides_files/figure-html/unnamed-chunk-5-1.svg" style="display: block; margin: auto;" /&gt;
 
 
 ---
@@ -147,7 +147,7 @@ mv %&gt;%
   geom_density()
 ```
 
-&lt;img src="ISP_lecture_8_slides_files/figure-html/unnamed-chunk-7-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="ISP_lecture_8_slides_files/figure-html/unnamed-chunk-7-1.svg" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -193,7 +193,7 @@ mv %&gt;%
   geom_density()
 ```
 
-&lt;img src="ISP_lecture_8_slides_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="ISP_lecture_8_slides_files/figure-html/unnamed-chunk-9-1.svg" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -224,7 +224,7 @@ pClean + geom_smooth(method = 'lm')
 ## `geom_smooth()` using formula = 'y ~ x'
 ```
 
-&lt;img src="ISP_lecture_8_slides_files/figure-html/unnamed-chunk-11-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="ISP_lecture_8_slides_files/figure-html/unnamed-chunk-11-1.svg" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -311,7 +311,7 @@ mv %&gt;%
   geom_histogram()
 ```
 
-&lt;img src="ISP_lecture_8_slides_files/figure-html/unnamed-chunk-14-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="ISP_lecture_8_slides_files/figure-html/unnamed-chunk-14-1.svg" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -325,7 +325,7 @@ mv %&gt;%
   geom_smooth()
 ```
 
-&lt;img src="ISP_lecture_8_slides_files/figure-html/unnamed-chunk-15-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="ISP_lecture_8_slides_files/figure-html/unnamed-chunk-15-1.svg" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -418,7 +418,7 @@ pIMDB &lt;- mv %&gt;%
 pIMDB
 ```
 
-&lt;img src="ISP_lecture_8_slides_files/figure-html/unnamed-chunk-18-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="ISP_lecture_8_slides_files/figure-html/unnamed-chunk-18-1.svg" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -506,7 +506,7 @@ p &lt;- data.frame(budget = mean(rmseBudget),
 p
 ```
 
-&lt;img src="ISP_lecture_8_slides_files/figure-html/unnamed-chunk-22-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="ISP_lecture_8_slides_files/figure-html/unnamed-chunk-22-1.svg" style="display: block; margin: auto;" /&gt;
 
 
 ---
@@ -581,7 +581,7 @@ bsRes %&gt;%
   geom_violin()
 ```
 
-&lt;img src="ISP_lecture_8_slides_files/figure-html/unnamed-chunk-25-1.png" style="display: block; margin: auto;" /&gt;
+&lt;img src="ISP_lecture_8_slides_files/figure-html/unnamed-chunk-25-1.svg" style="display: block; margin: auto;" /&gt;
 
 
 ---
@@ -1100,9 +1100,9 @@ tidy(lm(accuracy ~ mental_state,fn))
 
 --
 
-  - Decimal, then 4 zeros, then the number
+  - Decimal, then 3 zeros, then the number
   
-  - `0.0000747`
+  - `0.000747`
   
 --
 
@@ -1110,7 +1110,21 @@ tidy(lm(accuracy ~ mental_state,fn))
 
 --
 
-  - `0.0139`
+  - `0.139`
+
+--
+
+- Rule: take the number, and move the decimal `\(n\)` places to the left, where `\(n\)` is the negative number following the `e`
+
+--
+
+- What about `7.47e+4`
+
+--
+
+- Rule: take the number, and move the decimal `\(n\)` places to the **right**, where `\(n\)` is the positive number following the `e`
+
+  - 74,700
 
 ---
 
