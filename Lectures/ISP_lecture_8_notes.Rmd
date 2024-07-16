@@ -1,5 +1,5 @@
 ---
-title: "Lecture 7 Notes"
+title: "Lecture 8 Notes"
 output: html_document
 date: "2024-07-15"
 ---
@@ -8,114 +8,122 @@ date: "2024-07-15"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Regression
-
-- Starting with old school data
+# Regression using mv.rds data
 
 ```{r}
 require(tidyverse)
-
-debt <- read_rds("https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/sc_debt.Rds")
-```
-
-# Univariate VIsualization
-
-```{r}
-# Looking at X variable first
-debt %>%
-  ggplot(aes(x = sat_avg)) + 
-  geom_histogram()
-
-# Look at Y variable second
-debt %>%
-  ggplot(aes(x = md_earn_wne_p6)) + 
-  geom_histogram()
-```
-
-# Multivariate Visualization
-
-```{r}
-debt %>%
-  ggplot(aes(x = sat_avg,
-             y = md_earn_wne_p6)) + 
-  geom_point() + 
-  geom_smooth(method = 'lm') + 
-  xlim(c(0,1600)) + 
-  ylim(c(-13000,130000))
-
-```
-
-# Introducing lm() function
-
-- Two inputs:
-
-1. `formula`
-
-2. `data`
-
-```{r}
-model_1 <- lm(md_earn_wne_p6 ~ sat_avg,debt)
-
-summary(model_1)
-```
-
-# Better summary of lm() function results
-
-- use `broom` package
-
-```{r}
-require(broom)
-tidy(model_1)
-```
-
-# Introducing Movies!
-
-```{r}
 mv <- read_rds("https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/mv.Rds")
 ```
 
-# # of observations / unit of analysis / # of variables
+# pivot_longer()
 
 ```{r}
-summary(mv)
+mv_long <- mv %>%
+  select(title,budget,gross) %>%
+  drop_na() %>%
+  pivot_longer(cols = c("budget","gross"),
+               names_to = "measure",
+               values_to = "dollar")
 ```
 
-# Univariate Visualization
+# Create univariate visualization of both X and Y together
 
 ```{r}
-# Y variable
-mv %>%
-  ggplot(aes(x = gross)) + 
-  geom_histogram()
-
-# X Variable
-mv %>%
-  ggplot(aes(x = budget)) + 
-  geom_histogram()
-
+mv_long %>%
+  ggplot(aes(x = dollar,
+             fill = measure)) + 
+  geom_density(alpha = .2)
 ```
 
-# Using log() to fix skew
+# Log to get rid of extreme skew
 
 ```{r}
-mv <- mv %>%
+mv_long %>%
+  mutate(dollar_log = log(dollar)) %>%
+  ggplot(aes(x = dollar_log,
+             color = measure)) + 
+  geom_density()
+```
+
+# Running multivariate viz and regression
+
+```{r}
+mv_analysis <- mv %>%
+  drop_na(gross,budget) %>%
   mutate(gross_log = log(gross),
          budget_log = log(budget))
 
-# Look at univariate again
-mv %>%
-  ggplot(aes(x = gross_log)) + 
-  geom_histogram()
+# Multivariate visualization
+mv_analysis %>%
+  ggplot(aes(x = budget_log,
+             y = gross_log)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm')
+```
 
-mv %>%
-  ggplot(aes(x = budget_log)) + 
+# Running regression with the lm() function
+
+```{r}
+m1 <- lm(gross_log ~ budget_log,
+   data = mv_analysis)
+
+# Looking at result: two methods
+# Method 1: use summary()
+summary(m1)
+# Method 2: use tidy() from broom package
+require(broom)
+tidy(m1)
+```
+
+# Tangent: log rules
+
+```{r}
+(exp(0.96)-1)*100
+```
+
+# Evaluating model performance
+
+Step 1: Look at errors
+
+First, calculate the errors
+
+```{r}
+mv_analysis <- mv_analysis %>%
+  mutate(Yhat = predict(m1)) %>%
+  mutate(error = gross_log - Yhat)
+
+# Summarize the errors
+summary(mv_analysis %>% 
+          select(error))
+
+# Reminder of what Y looks like
+mv_analysis %>%
+  ggplot(aes(x = gross_log)) + 
   geom_histogram()
 ```
 
-# Multivariate
+# Looking at the shape of error
+
+First, univariate visualization of the errors
 
 ```{r}
+mv_analysis %>%
+  ggplot(aes(x = error)) + 
+  geom_histogram() + 
+  geom_vline(xintercept = 0,
+             linetype = 'dashed')
+```
 
+Second, multivariate visualization of the errors
+
+```{r}
+mv_analysis %>%
+  ggplot(aes(x = budget_log,
+             y = error)) + 
+  geom_point() + 
+  geom_hline(yintercept = 0,
+             linetype = 'dashed') + 
+  geom_smooth()
 ```
 
 

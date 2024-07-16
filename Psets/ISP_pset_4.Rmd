@@ -1,7 +1,7 @@
 ---
 title: "Problem Set 4"
 author: "[YOUR NAME]"
-date: "Due Date: 2024-07-19"
+date: "Due Date: 2024-07-19 by 11:59PM"
 output:
   html_document: default
   pdf_document: default
@@ -45,7 +45,7 @@ This problem set is worth 10 total points, plus **two** extra credit questions, 
 
 The point values for each question are indicated in brackets below. To receive full credit, you must have the correct code. In addition, some questions ask you to provide a written response in addition to the code.
 
-You are free to rely on whatever resources you need to complete this problem set, including lecture notes, lecture presentations, Google, your classmates...you name it. However, the final submission must be complete by you. There are no group assignments. To submit, email the knitted output to Eun Ji Kim (kej990804@snu.ac.kr) **as a PDF** by the start of class on Friday, July 12th. If you need help converting to a PDF, see [this tutorial](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_0_HELPER.pdf).
+You are free to rely on whatever resources you need to complete this problem set, including lecture notes, lecture presentations, Google, your classmates...you name it. However, the final submission must be complete by you. There are no group assignments. To submit, post the knitted output to eTL website (pset 4 assignment) by 11:59PM on Friday, July 19th. If you need help converting to a PDF, see [this tutorial](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_0_HELPER.pdf).
 
 **Good luck!**
 
