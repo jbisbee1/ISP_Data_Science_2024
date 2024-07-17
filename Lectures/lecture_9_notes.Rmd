@@ -1,0 +1,227 @@
+---
+title: "Lecture 9 Notes"
+output: html_document
+date: "2024-07-17"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+require(tidyverse)
+mv <- read_rds('https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/mv.Rds')
+```
+
+# Compare two regressions
+
+```{r}
+# Step 1: Prepare the data
+mv_analysis <- mv %>%
+  mutate(gross_log = log(gross),
+         budget_log = log(budget)) %>%
+  drop_na(gross_log,budget_log,score)
+
+# Step 2: Run regressions
+m_budget <- lm(gross_log ~ budget_log,
+               data = mv_analysis)
+
+m_score <- lm(gross_log ~ score,
+              data = mv_analysis)
+
+# Step 3: Translate to plain language
+require(broom)
+tidy(m_budget)
+tidy(m_score)
+exp(16.1)
+(exp(0.279)-1)*100
+```
+
+# Looking at errors
+
+- Step 1: Create the errors
+
+```{r}
+mv_analysis <- mv_analysis %>%
+  mutate(Yhat_budget = predict(m_budget),
+         Yhat_score = predict(m_score))
+
+mv_analysis <- mv_analysis %>%
+  mutate(error_budget = gross_log - Yhat_budget,
+         error_score = gross_log - Yhat_score)
+```
+
+- Step 2: univariate visualization of errors
+
+```{r}
+mv_analysis %>%
+  select(title,error_budget,error_score)
+mv_analysis %>%
+  ggplot(aes(x = error_budget)) + 
+  geom_histogram()
+
+mv_analysis %>%
+  ggplot(aes(x = error_score)) + 
+  geom_histogram()
+```
+
+- Step 3: Multivariate visualization
+
+```{r}
+mv_analysis %>%
+  ggplot(aes(x = budget_log,
+             y = error_budget)) + 
+  geom_point() + 
+  geom_smooth()
+
+mv_analysis %>%
+  ggplot(aes(x = score,
+             y = error_score)) + 
+  geom_point() + 
+  geom_smooth()
+```
+
+- Step 4: Cross validated RMSE
+
+```{r,message = F}
+set.seed(123)
+cvRes <- NULL
+for(i in 1:100) {
+  # First, split the data
+  train <- mv_analysis %>%
+    sample_n(size = round(nrow(mv_analysis)*.8),
+             replace = F)
+  test <- mv_analysis %>%
+    anti_join(train)
+  
+  # Second, estimate models in train data
+  mTmp_budget <- lm(gross_log ~ budget_log,
+                    data = train)
+  mTmp_score <- lm(gross_log ~ score,
+                   data = train)
+  
+  # Third, calculate RMSE
+  answer <- test %>%
+    mutate(Yhat_budget = predict(mTmp_budget,
+                                 newdata = test),
+           Yhat_score = predict(mTmp_score,
+                                newdata = test)) %>%
+    mutate(error_budget = gross_log - Yhat_budget,
+           error_score = gross_log - Yhat_score) %>%
+    summarise(rmse_budget = sqrt(mean(error_budget^2)),
+              rmse_score = sqrt(mean(error_score^2))) %>%
+    mutate(cv_number = i)
+
+  # Save result to cvRes object
+  cvRes <- cvRes %>%
+    bind_rows(answer)
+}
+```
+
+# Looking at CV results
+
+```{r}
+cvRes %>%
+  summarise(rmse_budget_avg = mean(rmse_budget),
+            rmse_score_avg = mean(rmse_score))
+
+# Visualize the answer
+cvRes %>%
+  mutate(budget_score_diff = rmse_budget - rmse_score) %>%
+  ggplot(aes(x = budget_score_diff)) + 
+  geom_density() + 
+  geom_vline(xintercept = 0)
+
+cvRes %>%
+  pivot_longer(cols = c(rmse_budget,rmse_score),
+               names_to = "model",
+               values_to = "rmse") %>%
+  ggplot(aes(x = rmse,
+             fill = model)) + 
+  geom_density(alpha = .3)
+```
+
+# Bechdel Test
+
+- First, look at the data
+
+```{r}
+summary(mv %>%
+  select(bechdel_score))
+
+mv_analysis <- mv %>%
+  drop_na(bechdel_score,gross) %>%
+  mutate(gross_log = log(gross))
+
+mv_analysis %>%
+  ggplot(aes(x = bechdel_score)) + 
+  geom_histogram()
+
+# Wrangle data to create binary bechdel score
+mv_analysis <- mv_analysis %>%
+  mutate(bechdel_pass = ifelse(bechdel_score == 3,
+                               "Pass",
+                               "Fail"))
+
+mv_analysis %>%
+  ggplot(aes(x = bechdel_pass)) + 
+  geom_bar()
+```
+
+# Regression
+
+```{r}
+m_bechdel_binary <- lm(gross_log ~ bechdel_pass,
+                       data = mv_analysis)
+
+tidy(m_bechdel_binary)
+(exp(-.233)-1)*100
+```
+
+# Controlling for budget
+
+```{r}
+mv_analysis <- mv_analysis %>%
+  mutate(budget_log = log(budget)) %>%
+  drop_na(gross_log,budget_log,bechdel_pass)
+
+m_bechdel_control <- lm(gross_log ~ bechdel_pass + budget_log,
+                        data = mv_analysis)
+
+tidy(m_bechdel_control)
+exp(2.12)
+(exp(.188)-1)*100
+```
+
+# New variable: categorical X
+
+- Rating: A movie's rating is assigned to inform people how violent / drug / alcohol / sexy the movie
+
+```{r}
+mv_analysis %>%
+  count(rating)
+
+# Wrangling the data
+mv_analysis <- mv %>%
+  mutate(rating = ifelse(rating %in% c("NC-17","Not Rated",
+                                       "TV-MA","Unrated",
+                                       "TV-14","TV-PG"),
+                         NA,
+                         rating),
+         gross_log = log(gross)) %>%
+  drop_na(gross_log,rating)
+
+# Univariate visualization
+mv_analysis %>%
+  ggplot(aes(x = rating)) + 
+  geom_bar()
+```
+
+# Run the regression
+
+```{r}
+m_rating <- lm(gross_log ~ rating,
+               data = mv_analysis)
+tidy(m_rating)
+```
+
