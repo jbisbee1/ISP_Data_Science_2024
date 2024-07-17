@@ -124,7 +124,7 @@ All these can also be found on the [Campuswire calendar](https://campuswire.com/
 
 ## Syllabus
 
-| Date | Topic | Learning Goal | Materials | HW | Pset 
+| Date | Topic | Learning Goal | Slides | HW | Pset 
 | ---: | :--- | :--- | --- | --- | --- 
 07/01 | Introduction | Scientific method, camps of analysis | [PDF](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Lectures/ISP_lecture_1_slides.pdf), [HTML](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ISP_lecture_1_slides.html) | [HW 1](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_1.pdf) | [PS 1](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_1.Rmd)
 07/02 | Intro to R | Objects, functions, and visualization | [PDF](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Lectures/ISP_lecture_2_slides.pdf), [HTML](https://www.jamesbisbee.com/ISP_Data_Science_2024/Lectures/ISP_lecture_2_slides.html) | [HW 2](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Homeworks/ISP_hw_2.pdf) | 
