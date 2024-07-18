@@ -1,0 +1,375 @@
+---
+title: "Lecture 10 Notes"
+output: html_document
+date: "2024-07-17"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# On Zoom!
+
+To get started:
+
+1. Require `tidyverse`
+
+2. Load the Fortnite data `fn_cleaned_final.rds` from Github
+
+```{r}
+require(tidyverse)
+
+fn <- read_rds("https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/fn_cleaned_final.rds")
+```
+
+# What is a binary variable?
+
+- Takes on only one of two values: i.e., 0 or 1/ pass or fail / won or lost / rookie or not rookie
+
+```{r}
+summary(fn %>%
+  select(won))
+
+fn %>%
+  summarise(prob_win = mean(won))
+```
+
+# RQ: does the mental state predicting the probability of winning?
+
+- Univariate visualization of both $X$ and $Y$ variable
+
+  - $X$: mental state
+  - $Y$: winning (0,1)
+  
+```{r}
+# Univariate visualization of the Y
+fn %>%
+  ggplot(aes(x = won)) + 
+  geom_bar() + 
+  labs(x = 'Won (0 = lose, 1 = win)',
+       y = 'Number of games')
+
+# Univariate visualization of the X
+fn %>%
+  ggplot(aes(x = mental_state)) + 
+  geom_bar() + 
+  labs(x = "Mental state",
+       y = "Number of games")
+```
+
+# Multivariate analysis
+
+- Calculate probability of winning **by** the mental state
+
+```{r}
+fn %>%
+  group_by(mental_state) %>%
+  summarise(prob_win = mean(won))
+
+# Multivariate visualization
+# Option 1: geom_bar()
+fn %>%
+  group_by(mental_state) %>%
+  summarise(prob_win = mean(won)) %>%
+  ggplot(aes(x = mental_state,
+             y = prob_win)) + 
+  geom_bar(stat = 'identity')
+
+# Option 2: geom_density() / geom_histogram() + fill
+fn %>%
+  ggplot(aes(x = won,
+             fill = mental_state)) + 
+  geom_histogram(position = 'dodge')
+
+# Option 3: geom_bar() + fill
+fn %>%
+  ggplot(aes(x = won,
+             fill = mental_state)) + 
+  geom_bar(position = 'dodge')
+```
+
+# Add one more X variable: accuracy
+
+```{r}
+fn %>%
+  select(accuracy)
+
+fn %>%
+  ggplot(aes(x = accuracy)) + 
+  geom_histogram()
+```
+
+# Trivariate Visualization
+
+- $Y$: `won`
+
+- $X_1$: `mental_state`
+
+- $X_2$: `accuracy`
+
+- `geom_tile()`
+
+```{r}
+# Step 1: convert numeric to categorical
+# Child function: ntile()
+fn <- fn %>%
+  mutate(accuracy_ntile = ntile(accuracy, n = 5))
+
+# Calculate probability of winning by categorical accuracy
+fn %>%
+  group_by(accuracy_ntile) %>%
+  summarise(prob_win = mean(won))
+
+# Multivariate visualization first:
+# Bad approach
+fn %>%
+  ggplot(aes(x = factor(accuracy_ntile),
+             y = won)) + 
+  geom_boxplot()
+
+# Good approach
+fn %>%
+  group_by(accuracy_ntile) %>%
+  summarise(prob_win = mean(won)) %>%
+  ggplot(aes(x = factor(accuracy_ntile),
+             y = prob_win)) + 
+  geom_bar(stat = 'identity') + 
+  labs(x = 'Accuracy quintiles (1 = bottom quintile, 5 = top quintile)',
+       y = 'Probability of winning')
+```
+
+# Trivariate visualization with geom_tile()
+
+- Calculate probability of winning **by** mental state **and** accuracy quintile
+
+```{r}
+fn %>%
+  group_by(mental_state,
+           accuracy_ntile) %>%
+  summarise(prob_win = mean(won)) %>%
+  ggplot(aes(x = mental_state,
+             y = factor(accuracy_ntile),
+             fill = prob_win)) + 
+  geom_tile() + 
+  labs(x = "Mental State",
+       y = "Accuracy quintile (1 = bottom, 5 = top)",
+       fill = "Probability of winning")
+```
+
+# Quick aside: What about continuous $X$?
+
+- Multivariate visualization of `accuracy` versus `won`
+
+```{r}
+fn %>%
+  ggplot(aes(y = factor(won),
+             x = accuracy)) + 
+  # geom_boxplot()
+  geom_jitter()
+
+fn %>%
+  ggplot(aes(x = accuracy,
+             fill = factor(won))) + 
+  geom_density(alpha = .3)
+```
+
+# Accuracy, sensitivity and specificity
+
+- Looking at `hits` instead of `accuracy` so I don't confuse students
+
+```{r}
+fn %>%
+  ggplot(aes(x = hits)) + 
+  geom_histogram()
+
+fn <- fn %>%
+  mutate(hits_quintile = ntile(hits,n = 5))
+
+fn %>%
+  group_by(hits_quintile,mental_state) %>%
+  summarise(prob_win = mean(won))
+
+# Use mutate() instead of summarise() to ADD prob_win to the data
+fn <- fn %>%
+  group_by(hits_quintile,mental_state) %>%
+  mutate(prob_win = mean(won)) %>%
+  ungroup() # Best practices for clean coding
+
+fn %>%
+  select(hits_quintile,mental_state,won,prob_win)
+```
+
+# Thresholds for prediction
+
+- Goal: convert `prob_win` into 0 or 1
+
+- Solution: choose a threshold value
+
+  - Above this threshold, convert to 1
+  
+  - Below this threshold, convert to 0
+  
+```{r}
+fn <- fn %>%
+  mutate(pred_win = ifelse(prob_win > .5,
+                           1,
+                           0))
+
+fn %>%
+  select(mental_state,hits_quintile,
+         won,prob_win,pred_win)
+```
+
+- Calculate model accuracy
+
+```{r}
+fn %>%
+  group_by(won,pred_win) %>%
+  summarise(nGames = n())
+
+# fn %>%
+#   count(won,pred_win)
+
+# Manually calculate accuracy
+(625 + 50) / (625 + 41 + 241 + 50)
+
+# Programmatically calculate accuracy
+fn %>%
+  group_by(won,pred_win) %>%
+  summarise(nGames = n()) %>%
+  ungroup() %>% # BEST PRACTICES!
+  mutate(nCorrect = (won == pred_win)*nGames) %>%
+  mutate(accuracy = sum(nCorrect) / sum(nGames))
+
+# Overall proportion of wins
+mean(fn$won)
+
+fn %>%
+  # mutate(pred_win = 0) %>%
+  group_by(won,pred_win) %>%
+  summarise(nGames = n()) %>%
+  ungroup() %>% # BEST PRACTICES!
+  mutate(nCorrect = (won == pred_win)*nGames) %>%
+  mutate(accuracy = sum(nCorrect) / sum(nGames))
+```
+
+# Sensitivity and Specificity
+
+- **Sensitivity**: Accuracy in predicting 1s
+
+- **Specificity**: Accuracy in predicting 0s
+
+```{r}
+# Calculate the proportion for each row
+fn %>%
+  group_by(won,pred_win) %>%
+  summarise(nGames = n()) %>%
+  ungroup() %>%
+  group_by(won) %>%
+  mutate(total_games = sum(nGames)) %>%
+  ungroup() %>%
+  mutate(proportion = nGames / total_games) %>%
+  mutate(nCorrect = (won == pred_win)*nGames) %>%
+  mutate(accuracy = sum(nCorrect) / sum(nGames))
+```
+
+# Varying the threshold for predicted wins
+
+```{r}
+fn %>%
+  mutate(pred_win = ifelse(prob_win > .35, # Generate predictions
+                           1,
+                           0)) %>%
+  group_by(won,pred_win) %>%   # Create results table
+  summarise(nGames = n()) %>%
+  ungroup() %>%
+  group_by(won) %>%
+  mutate(total_games = sum(nGames)) %>%
+  ungroup() %>%
+  mutate(proportion = nGames / total_games) %>%
+  mutate(nCorrect = (won == pred_win)*nGames) %>%
+  mutate(accuracy = sum(nCorrect) / sum(nGames))
+```
+
+- Use a `for()` loop
+
+```{r,message=F}
+list_of_thresholds <- seq(0,1,by = .01)
+threshRes <- NULL
+for(threshold in list_of_thresholds) {
+  answer <- fn %>%
+  mutate(pred_win = ifelse(prob_win > threshold, # Generate predictions
+                           1,
+                           0)) %>%
+  group_by(won,pred_win) %>%   # Create results table
+  summarise(nGames = n()) %>%
+  ungroup() %>%
+  group_by(won) %>%
+  mutate(total_games = sum(nGames)) %>%
+  ungroup() %>%
+  mutate(proportion = nGames / total_games) %>%
+  mutate(nCorrect = (won == pred_win)*nGames) %>%
+  mutate(accuracy = sum(nCorrect) / sum(nGames)) %>%
+    mutate(threshold = threshold)
+  
+  threshRes <- threshRes %>%
+    bind_rows(answer)
+}
+
+threshRes
+```
+
+# Let's analyze the threshold results!
+
+```{r}
+threshRes %>%
+  mutate(metric = ifelse(won == 1 & pred_win == 1,"Sensitivity",
+                         ifelse(won == 0 & pred_win == 0,'Specificity',
+                                NA))) %>%
+  drop_na(metric) %>%
+  ggplot(aes(x = threshold,
+             y = proportion,
+             color = metric)) + 
+  geom_line() + 
+  geom_vline(xintercept = .3)
+```
+
+# Area Under the Curve (AUC)
+
+```{r}
+View(threshRes)
+
+threshRes %>%
+  mutate(metric = ifelse(won == 1 & pred_win == 1,"Sensitivity",
+                         ifelse(won == 0 & pred_win == 0,'Specificity',
+                                NA))) %>%
+  drop_na(metric) %>%
+  select(metric,proportion,threshold) %>%
+  pivot_wider(names_from = 'metric',
+              values_from = 'proportion',
+              values_fill = 0) %>%
+  ggplot(aes(x = 1-Specificity,
+             y = Sensitivity)) + 
+  geom_line() + 
+  geom_abline(intercept = 0,
+              slope = 1)
+```
+
+# Calculating the AUC
+
+- R does this for us!
+
+  - Need the `roc_auc()` function from the `tidymodels` package
+
+```{r}
+require(tidymodels)
+# roc_auc()
+
+toEval <- fn %>%
+  select(won,prob_win) %>%
+  mutate(won = factor(won,    # Need to convert numeric binary Y to factor
+                      levels = c('1','0'))) # NEED TO MAKE THE 1 VALUE COME FIRST
+
+roc_auc(toEval,won,prob_win)
+```
+
