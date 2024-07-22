@@ -1,0 +1,310 @@
+---
+title: "Lecture 11 Notes"
+output: html_document
+date: "2024-07-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+require(tidyverse)
+require(tidymodels)
+fn <- read_rds("https://github.com/jbisbee1/ISP_Data_Science_2024/raw/main/data/fn_cleaned_final.rds")
+```
+
+# RQ: Relationship between damage_to_players and won
+
+```{r}
+summary(fn %>%
+  select(won,damage_to_players))
+
+fn %>%
+  select(damage_to_players)
+
+# Univariate visualization
+fn %>%
+  ggplot(aes(x = damage_to_players)) + 
+  geom_histogram()
+```
+
+# Linear regression
+
+```{r}
+m_lm <- lm(won ~ damage_to_players,
+           data = fn)
+
+require(broom)
+tidy(m_lm)
+```
+
+ #Getting YHat
+ 
+```{r,message=F}
+fn <- fn %>%
+  mutate(prob_win_lm = predict(m_lm))
+
+fn <- fn %>%
+  mutate(pred_win_lm = ifelse(prob_win_lm > .5,
+                              1,
+                              0))
+
+# Creating the sensitivity & specificity table
+fn %>%
+  group_by(won,pred_win_lm) %>%
+  summarise(nGames = n()) %>%
+  group_by(won) %>%
+  mutate(total_games = sum(nGames)) %>%
+  ungroup() %>%
+  mutate(proportion = nGames / total_games) %>%
+  mutate(accuracy = sum((won == pred_win_lm)*nGames) / sum(nGames))
+
+# Create sensitivity & specificity plot
+toplot <- NULL
+for(thresh in seq(0,1,by = 0.025)) {
+  fn <- fn %>%
+  mutate(pred_win_lm = ifelse(prob_win_lm > thresh,
+                              1,
+                              0))
+# Creating the sensitivity & specificity table
+answer <- fn %>%
+  group_by(won,pred_win_lm) %>%
+  summarise(nGames = n()) %>%
+  group_by(won) %>%
+  mutate(total_games = sum(nGames)) %>%
+  ungroup() %>%
+  mutate(proportion = nGames / total_games) %>%
+  # mutate(accuracy = sum((won == pred_win_lm)*nGames) / sum(nGames)) %>%
+  mutate(threshold = thresh)
+
+toplot <- toplot %>%
+  bind_rows(answer)
+}
+```
+ 
+ # Look at sensitivity & specificity
+ 
+```{r}
+# Intersection plot
+toplot <- toplot %>%
+  mutate(metric = ifelse(won == 1 & pred_win_lm == 1,'Sensitivity',
+                         ifelse(won == 0 & pred_win_lm == 0,'Specificity',
+                                NA)))
+
+toplot %>%
+  drop_na(metric) %>%
+  ggplot(aes(x = threshold,
+             y = proportion,
+             color = metric)) + 
+  geom_line() + 
+  geom_vline(xintercept = .29)
+
+# ROC plot
+toplot %>%
+  drop_na(metric) %>%
+  select(proportion,threshold,metric) %>%
+  pivot_wider(names_from = 'metric',
+              values_from = 'proportion',
+              values_fill = 0) %>%
+  ggplot(aes(x = 1-Sensitivity,
+             y = Specificity)) + 
+  geom_line() + 
+  geom_abline(intercept = 0,
+              slope = 1,color = 'red',linetype = 'dashed')
+```
+
+# Calculate AUC
+
+```{r}
+require(tidymodels)
+# roc_auc()
+
+forAUC <- fn %>%
+  select(won,prob_win_lm) %>%
+  mutate(won = factor(won,levels = c('1','0')))
+
+roc_auc(forAUC,won,prob_win_lm)
+```
+
+# Running a logit in R
+
+```{r}
+m_glm <- glm(formula = won ~ damage_to_players,
+             data = fn,
+             family = binomial(link = "logit"))
+
+tidy(m_glm)
+```
+
+# Evaluate the model
+
+```{r,message=F}
+fn <- fn %>%
+  mutate(prob_win_glm = predict(m_glm,type = 'response'))
+
+# Create sensitivity & specificity plot
+toplot <- NULL
+for(thresh in seq(0,1,by = 0.025)) {
+  fn <- fn %>%
+  mutate(pred_win_glm = ifelse(prob_win_glm > thresh,
+                              1,
+                              0))
+# Creating the sensitivity & specificity table
+answer <- fn %>%
+  group_by(won,pred_win_glm) %>%
+  summarise(nGames = n()) %>%
+  group_by(won) %>%
+  mutate(total_games = sum(nGames)) %>%
+  ungroup() %>%
+  mutate(proportion = nGames / total_games) %>%
+  # mutate(accuracy = sum((won == pred_win_lm)*nGames) / sum(nGames)) %>%
+  mutate(threshold = thresh)
+
+toplot <- toplot %>%
+  bind_rows(answer)
+}
+
+
+# Intersection plot
+toplot <- toplot %>%
+  mutate(metric = ifelse(won == 1 & pred_win_glm == 1,'Sensitivity',
+                         ifelse(won == 0 & pred_win_glm == 0,'Specificity',
+                                NA)))
+
+toplot %>%
+  drop_na(metric) %>%
+  ggplot(aes(x = threshold,
+             y = proportion,
+             color = metric)) + 
+  geom_line() + 
+  geom_vline(xintercept = .27)
+
+# ROC plot
+toplot %>%
+  drop_na(metric) %>%
+  select(proportion,threshold,metric) %>%
+  pivot_wider(names_from = 'metric',
+              values_from = 'proportion',
+              values_fill = 0) %>%
+  ggplot(aes(x = 1-Sensitivity,
+             y = Specificity)) + 
+  geom_line() + 
+  geom_abline(intercept = 0,
+              slope = 1,color = 'red',linetype = 'dashed')
+
+
+forAUC <- fn %>%
+  select(won,prob_win_glm) %>%
+  mutate(won = factor(won,levels = c('1','0')))
+
+roc_auc(forAUC,won,prob_win_glm)
+```
+
+
+# Random forests with ranger()
+
+```{r}
+require(ranger)
+
+m_rf <- ranger(formula = won ~ damage_to_players,
+       data = fn)
+
+m_rf
+
+# Evaluate
+tmp_rf <- predict(m_rf,data = fn)
+
+fn <- fn %>%
+  mutate(prob_win_rf = tmp_rf$predictions)
+
+# Create sensitivity & specificity plot
+toplot <- NULL
+for(thresh in seq(0,1,by = 0.025)) {
+  fn <- fn %>%
+  mutate(pred_win_rf = ifelse(prob_win_rf > thresh,
+                              1,
+                              0))
+# Creating the sensitivity & specificity table
+answer <- fn %>%
+  group_by(won,pred_win_rf) %>%
+  summarise(nGames = n()) %>%
+  group_by(won) %>%
+  mutate(total_games = sum(nGames)) %>%
+  ungroup() %>%
+  mutate(proportion = nGames / total_games) %>%
+  # mutate(accuracy = sum((won == pred_win_lm)*nGames) / sum(nGames)) %>%
+  mutate(threshold = thresh)
+
+toplot <- toplot %>%
+  bind_rows(answer)
+}
+
+
+# Intersection plot
+toplot <- toplot %>%
+  mutate(metric = ifelse(won == 1 & pred_win_rf == 1,'Sensitivity',
+                         ifelse(won == 0 & pred_win_rf == 0,'Specificity',
+                                NA)))
+
+toplot %>%
+  drop_na(metric) %>%
+  ggplot(aes(x = threshold,
+             y = proportion,
+             color = metric)) + 
+  geom_line() + 
+  geom_vline(xintercept = .395)
+
+# ROC plot
+toplot %>%
+  drop_na(metric) %>%
+  select(proportion,threshold,metric) %>%
+  pivot_wider(names_from = 'metric',
+              values_from = 'proportion',
+              values_fill = 0) %>%
+  ggplot(aes(x = 1-Sensitivity,
+             y = Specificity)) + 
+  geom_line() + 
+  geom_abline(intercept = 0,
+              slope = 1,color = 'red',linetype = 'dashed')
+
+
+forAUC <- fn %>%
+  select(won,prob_win_rf) %>%
+  mutate(won = factor(won,levels = c('1','0')))
+
+roc_auc(forAUC,won,prob_win_rf)
+```
+
+
+# Cross validation to depress ourselves
+
+```{r}
+set.seed(123)
+cvRes <- NULL
+for(i in 1:100) {
+  train <- fn %>%
+    select(won,damage_to_players) %>%
+    drop_na() %>%
+    sample_n(size = round(nrow(.)*.6))
+  
+  test <- fn %>%
+    select(won,damage_to_players) %>%
+    drop_na() %>%
+    anti_join(train)
+  
+  # Train the models
+  tmpLM <- lm(won ~ damage_to_players,data = train)
+  tmpGLM <- glm(won ~ damage_to_players,data = train,
+                family = binomial(link = "logit"))
+  tmpRF <- ranger(won ~ damage_to_players,data = train)
+  
+  # Test the models
+  test %>%
+    mutate(pred_LM = predict(tmpLM,newdata = test),
+           pred_GLM = predict(tmpGLM,newdata = test))
+}
+```
+
+
+ 
