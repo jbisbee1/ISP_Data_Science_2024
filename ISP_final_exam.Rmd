@@ -1,0 +1,272 @@
+---
+title: "Final Exam"
+author: "[YOUR NAME]"
+date: "Due Date: 2024-07-24"
+output:
+  html_document: default
+  pdf_document: default
+subtitle: Summer 2024
+institute: Seoul National University
+---
+
+```{r,include=F}
+knitr::opts_chunk$set(error=TRUE)
+```
+
+
+## Overview
+
+This is your final exam. It consists of four questions plus one additional extra credit question. 
+
+## Grading
+
+The exam is worth 20 total points. The point values are indicated next to each question in brackets. The extra credit is worth **10 points (!)**, but is very hard so save it until you are comfortable with the rest of your answers.
+
+## Resources
+
+You are permitted to rely on all course resources from the summer intensive session. These include all lecture slides, problem sets, answer keys, homeworks, and lecture notes, as well as any and all posts to Campuswire. You can use ChatGPT as long as you copy the questions you asked into your answers to each question. 
+
+You are **not** permitted to review recordings during the final exam, nor collaborate with your classmates.
+
+## Codebook
+
+The final exam uses the `game_summary_final.Rds` dataset. This is data about NBA basketball games between the 2017 and 2019 seasons. The codebook is reproduced below:
+
+| Name         |                                          Description |
+|--------------|:-----------------------------------------------------|
+| dateGame     |                                     Date of the game |
+| nameTeam     |                                            Team Name |
+| locationGame |                        Game location, H=Home, A=Away |
+| tov          |                                      Total turnovers |
+| pts          |                                         Total points |
+| treb         |                                       Total rebounds |
+| oreb         |                                   Offensive rebounds |
+| pctFG        |                                Field Goal Percentage |
+| pctFT        |                                Free throw percentage |
+| second_game  |      Is this the second game in a row? TRUE or FALSE |
+| isWin        |                                   Won? 1=win, 0=loss |
+
+
+## Logistics
+
+You have three hours to complete this exam, although it is designed to only take forty-five minutes, **not including the extra credit question**. You must upload the PDF of the knitted output to the eTL website under the assignment labelled "final". If you need help converting to a PDF, see [this tutorial](https://github.com/jbisbee1/ISP_Data_Science_2024/blob/main/Psets/ISP_pset_0_HELPER.pdf).
+
+**Good luck!**
+
+*Copy the link to ChatGPT you used here: _________________
+
+
+## Question 0
+*Require `tidyverse`, `tidymodels`, `broom`, and `ranger` and load the `game_summary_final.Rds` data to an object called `game`.*
+
+```{r,message=F}
+# Require packages
+require(...)
+
+# Load the data from Github
+game <- read_rds("")
+```
+
+
+## Question 1 [1 point]
+*Research Question: What is the relationship between the total points scored and the location of the basketball game? Why do you think so? Based on your theory, what is the $X$ and the $Y$ variable? (If you need help with the variable names, see the codebook above.)*
+
+> Write answer here.
+
+## Question 2 [4 points]
+*Let's look at the data. First, how many observations are in this dataset? How many variables? What is the unit of analysis? Are there any missing data? [1 point]*
+
+```{r,message=F}
+# INSERT CODE HERE
+```
+
+> Write answer here.
+
+*Second, create univariate visualizations of both the $X$ and $Y$ variables, making sure to label your plots clearly [1 point]. Then create a multivariate visualization [1 point]. Does the data support your hypothesis from Q2? [1 point]*
+
+```{r,message=F}
+# Visualize X variable
+game %>%
+  ggplot(aes(x = ...)) + # Put X variable on x-axis
+  geom_...() +          # Choose the best geom_...()
+  labs(...)          # Make sure to give it descriptive labels! (Remember the grandmother rule)
+
+# Visualize Y variable
+game %>%
+  ggplot(aes(x = ...)) + # Put Y variable on x-axis
+  geom_...() +          # Choose the best geom_...()
+  labs(...)          # Make sure to give it descriptive labels! (Remember the grandmother rule)
+  
+# Multivariate visualization
+game %>%
+  ggplot(aes(x = ..., # Put X variable on x-axis
+             y = ...)) +  # Put Y variable on y-axis
+  geom_...() + # Choose the best geom_...()
+  labs(...) # Make sure to give it descriptive labels! (Remember the grandmother rule)
+```
+
+> Write answer here.
+
+
+## Question 3 [8 points]
+*Now run a linear regression and translate the results into plain language [1 point].*
+
+```{r,message=F}
+# Run regression and save to object
+m <- lm(formula = ...,
+        data = ...)
+tidy(m) # View the linear model results
+```
+
+> Write answer here.
+
+*Does the model support your hypothesis from Q1? How confident are you? [1 point]*
+
+> Write answer here.
+
+*How good is your model? Provide a univariate visualization of your errors first [1 point]. Is your model good? Why or why not? [1 point]*
+
+```{r,message=F}
+# Generate predicted outcomes (Yhat)
+game <- game %>%
+  mutate(yhat = ...)
+
+# Calculate the errors (Y - Yhat)
+game <- game %>%
+  mutate(error = ...)
+
+# Univariate visualization
+game %>%
+  ggplot(aes(x = ...)) + # Put the errors on the x-axis
+  geom_...() +  # Choose the best geom_...()
+  labs(...) # Make sure to give it descriptive labels! (Remember the grandmother rule)
+```
+
+> Write answer here.
+
+*Now create a multivariate visualization of the errors compared to the $X$ variable [1 point]. Is your model good? Why or why not? [1 point]*
+
+```{r,message=F}
+# Multivariate visualization
+game %>%
+  ggplot(aes(x = ..., # Put the X variable on the x-axis
+             y = ...)) + # Put the errors on the y-axis
+  geom_...() + # Choose the best geom_...()
+  labs(...) # Make sure to give it descriptive labels! (Remember the grandmother rule)
+```
+
+> Write answer here.
+
+*Finally, run 100-fold cross validation with an 80-20 split to estimate the RMSE [1 point]. Is your model good? Why or why not? [1 point]*
+
+```{r,message=F}
+set.seed(123) # Set the seed
+cvRes <- NULL # Instantiate an empty object
+for(...) { # Run the cross validation code 100 times
+  # Step 1: Split the data into training (80%) and test (20%) sets
+  train <- game %>%
+    sample_n(...)
+  
+  test <- game %>%
+    anti_join(...)
+  
+  # Step 2: Train the model on the training data
+  mTmp <- lm(formula = ...,
+             data = ...)
+  
+  # Step 3: Evaluate the model on the test data
+  answer <- test %>%
+    mutate(yhat = ...) %>%
+    mutate(error = ...) %>%
+    summarise(rmse = ...) %>%
+    mutate(cv_number = ...)
+  
+  # Save the result
+  cvRes <- cvRes %>%
+    bind_rows(...)
+}
+
+# Summarise the answer
+cvRes %>%
+  summarise(rmse = ...)
+```
+
+> Write answer here.
+
+## Question 4 [7 points]
+
+*Now let's look at a different outcome variable: `isWin`. We will predict winning as a function of total points scored ($X_1$) and the location of the game ($X_2$). First, what do you think the relationship will be between both $X$ variables and `isWin`? Why? [1 point]*
+
+> Write answer here.
+
+*Next, and as always, start by creating univariate [1 point] and multivariate visualizations of the three variables [1 point]. Make sure to use `ntile()` with `n = 5` and then `geom_tile()` to create the heatmap for the multivariate relationship! Does the multivariate visualization support both of your hypotheses from above?*
+
+```{r,message=F}
+# Univariate visualization
+# INSERT CODE HERE
+
+# Multivariate visualization
+game %>%
+  mutate(pts_quintile = ntile(...)) %>% # Calculate quintiles for the continuous X variable
+  group_by(...) %>% # Group by both X1 and X2 variables
+  summarise(prob_win = ...) %>% # Calculate the probability of winning
+  ungroup() %>% # Always ungroup() for best practices!
+  ggplot(aes(x = ..., # Put the binary X variable on the x-axis
+             y = ..., # Put the quintiles on the y-axis (don't forget to factor()!)
+             fill = ...)) + # Fill by the probability of winning
+  geom_...() +  # Choose the best geom_...()
+  labs(...) # Make sure to give it descriptive labels! (Remember the grandmother rule)
+```
+
+> Write answer here.
+
+*Now run a linear regression model predicting `isWin` as a function of `pts` and `locationGame` [1 point] and translate the output to plain language. Does the model support your two hypotheses from above? How confident are you? [1 point].*
+
+```{r,message=F}
+# Run the regression and save to an object
+m <- lm(formula = ...,
+        data = ...)
+tidy(m) # View the linear model results
+```
+
+> Write answer here.
+
+*Finally, calculate the area under the curve (AUC) using the `roc_auc()` function from the `tidymodels` package [1 point]. What grade would you give this model? [1 point]*
+
+```{r,message=F}
+# Create an object that contains the probability of winning predictions from the model and the outcome variable converted to a factor with the winning code coming first.
+forAUC <- game %>%
+  mutate(prob_win = ...) %>% # Get probability of winning
+  mutate(isWin = ...) # Convert outcome to a factor
+
+# Calculate AUC using the roc_auc() function from the tidymodels package
+roc_auc(..., # The data to use
+        ..., # The true outcome variable
+        ...) # The probabilities
+```
+
+> Write answer here.
+
+## Extra Credit [10 points]
+
+Let's compare three models and three specifications to predict winning. For the models, we want to test:
+
+1. Linear model (`lm()`)
+2. Logit model (`glm()`)
+3. Random forest (`ranger()`)
+
+For the specifications, we want to test:
+
+1. Simple: `isWin ~ locationGame`
+2. Complex: `isWin ~ locationGame + pts`
+3. Kitchen sink: `isWin ~ .`
+
+Which model and specification does the best job predicting winning? Answer this question using 10-fold cross validation with a 60-40 split [5 points], and then visualize the results to the best of your abilities [3 points]. Then, calculate the variable importance using the `ranger()` function with the "permutation" method. What are the top three variables that are most important for predicting whether a team wins a game [1 point]? What is the least important predictor [1 point]?
+
+**NOTE**: You must reset the data before running this analysis to not include any additional variables you added in the preceding exam. In other words, start by redownloading the data from github!
+
+```{r,message=F}
+# INSERT CODE HERE
+```
+
+> Write answer here.
